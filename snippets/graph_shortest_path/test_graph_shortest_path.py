@@ -1,4 +1,4 @@
-from model import shortest_path
+from .model import shortest_path
 
 
 def test_shortest_path_on_simple_graph():

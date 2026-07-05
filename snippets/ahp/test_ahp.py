@@ -1,5 +1,5 @@
 import numpy as np
-from model import ahp_weights
+from .model import ahp_weights
 
 
 def test_ahp_weights_on_consistent_matrix():

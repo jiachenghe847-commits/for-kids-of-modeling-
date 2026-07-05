@@ -1,5 +1,5 @@
 import numpy as np
-from model import fit_linear
+from .model import fit_linear
 
 
 def test_fit_linear_recovers_known_line():

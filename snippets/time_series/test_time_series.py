@@ -1,5 +1,5 @@
 import numpy as np
-from model import arima_forecast
+from .model import arima_forecast
 
 
 def test_arima_forecast_returns_requested_steps():

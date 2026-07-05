@@ -1,5 +1,5 @@
 import numpy as np
-from model import entropy_weights, topsis_score
+from .model import entropy_weights, topsis_score
 
 
 def test_entropy_weights_sum_to_one():

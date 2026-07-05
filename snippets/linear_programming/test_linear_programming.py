@@ -1,4 +1,4 @@
-from model import solve_lp
+from .model import solve_lp
 
 
 def test_solve_lp_known_optimum():

@@ -1,5 +1,5 @@
 import numpy as np
-from model import gm11_forecast
+from .model import gm11_forecast
 
 
 def test_gm11_forecast_reproduces_training_length_and_extends():

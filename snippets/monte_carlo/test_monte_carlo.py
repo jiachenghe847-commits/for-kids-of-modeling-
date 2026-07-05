@@ -1,4 +1,4 @@
-from model import estimate_by_sampling
+from .model import estimate_by_sampling
 
 
 def test_estimate_by_sampling_converges_on_known_distribution():

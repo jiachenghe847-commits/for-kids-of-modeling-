@@ -1,0 +1,69 @@
+% cumcm-toolkit/templates/paper.tex
+\documentclass[12pt]{article}
+\usepackage{ctex}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[colorlinks=true, linkcolor=black]{hyperref}
+\usepackage{geometry}
+\geometry{a4paper, margin=2.5cm}
+
+\title{论文标题}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+摘要正文。一段话说清问题、方法、关键结果、亮点。
+
+\vspace{1em}
+\noindent\textbf{关键词：} 关键词1；关键词2；关键词3（4-8 个，参见 analysis/writing-style-guide.md）
+\end{abstract}
+
+\section{问题重述}
+
+\section{问题分析}
+
+\section{模型假设}
+
+\begin{enumerate}
+  \item 假设一
+\end{enumerate}
+
+\section{符号说明}
+
+\begin{table}[htbp]
+  \centering
+  \caption{符号说明}
+  \begin{tabular}{cl}
+    \toprule
+    符号 & 含义 \\
+    \midrule
+    $Z$ & 目标函数 \\
+    $x_i$ & 决策变量 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\section{模型的建立与求解}
+
+\subsection{问题一}
+
+\section{灵敏度分析}
+
+\section{模型评价与推广}
+
+\subsection{模型的优点}
+
+\subsection{模型的缺点}
+
+\begin{thebibliography}{9}
+\bibitem{ref1} 作者. 文献标题[J]. 期刊名, 年份.
+\end{thebibliography}
+
+\appendix
+\section{程序代码}
+
+\end{document}

@@ -1,4 +1,5 @@
 import re
+import sys
 from pathlib import Path
 
 _FRONT_MATTER = re.compile(r"^---\n(.*?)\n---\n", re.DOTALL)
@@ -30,6 +31,7 @@ def scan_corpus(corpus_dir: str) -> list[dict]:
             continue
         fields = _parse_front_matter(path.read_text(encoding="utf-8", errors="replace"))
         if not fields:
+            print(f"warning: {path} 缺少可解析的 YAML front matter，已跳过", file=sys.stderr)
             continue
         fields["path"] = str(path)
         results.append(fields)

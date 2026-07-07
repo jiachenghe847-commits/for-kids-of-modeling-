@@ -1,7 +1,6 @@
 corpus/*
 !corpus/.gitkeep
 !corpus/manifest.md
-建模/
 *.aux
 *.log
 *.out

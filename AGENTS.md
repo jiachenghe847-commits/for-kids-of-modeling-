@@ -7,6 +7,7 @@
 - 章节结构和篇幅占比：`analysis/paper-structure.md`
 - 写作规范（时态/图表/公式/参考文献）：`analysis/writing-style-guide.md`
 - 评委扣分点自查表：`analysis/judge-deductions.md`
+- 配图指南（图类型/章节位置/美观规范/工具选型）：`analysis/figure-guide.md`
 - 三人共用符号表：`notation.md`（新符号先加进这里再用）
 
 ## 起草论文
@@ -19,7 +20,7 @@
 
 `snippets/` 下按方法分目录，每个目录三件套：`model.py`（可直接调用的函数）、`README.md`（什么时候用/参数/怎么读结果/常见坑）、`test_*.py`（用法示例）。先看题目像哪一类，再进对应目录看 README，不要跳过 README 直接抄代码。
 
-现有方法：`regression`（回归/拟合）、`ahp`（层次分析法）、`grey_prediction`（灰色预测）、`time_series`（ARIMA）、`graph_shortest_path`（图论最短路）、`linear_programming`（线性规划）、`monte_carlo`（蒙特卡洛仿真）、`topsis_entropy`（TOPSIS/熵权法）。
+现有方法：`regression`（回归/拟合）、`ahp`（层次分析法）、`grey_prediction`（灰色预测）、`time_series`（ARIMA）、`graph_shortest_path`（图论最短路）、`linear_programming`（线性规划）、`monte_carlo`（蒙特卡洛仿真）、`topsis_entropy`（TOPSIS/熵权法）、`plotting`（配图脚手架：灵敏度曲线/热力图/拟合对比/收敛曲线/多子图，先调 `style.apply_cumcm_style()` 再画图）。
 
 ## 提交前必做
 

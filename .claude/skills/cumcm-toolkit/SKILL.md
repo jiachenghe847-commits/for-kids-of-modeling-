@@ -12,6 +12,7 @@ description: 国赛（CUMCM）备赛工具箱——论文结构规范、写作�
 - 章节结构和篇幅占比：`analysis/paper-structure.md`
 - 写作规范：`analysis/writing-style-guide.md`
 - 评委扣分点自查表：`analysis/judge-deductions.md`
+- 配图指南（图类型/美观规范/工具选型）：`analysis/figure-guide.md`
 - 三人共用符号表：`notation.md`
 
 ## 起草论文
@@ -23,6 +24,10 @@ description: 国赛（CUMCM）备赛工具箱——论文结构规范、写作�
 ## 建模代码
 
 `snippets/<method>/{model.py, README.md, test_*.py}`，方法列表见 `AGENTS.md`。
+
+## 配图
+
+`snippets/plotting/`：先调 `style.apply_cumcm_style()` 再用 `plots.py` 里的函数（灵敏度曲线/热力图/拟合对比/收敛曲线/多子图）。画什么图、怎么美化、AI 生图的合规边界见 `analysis/figure-guide.md`。
 
 ## 提交前必做
 

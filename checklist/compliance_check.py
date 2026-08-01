@@ -23,6 +23,13 @@ def check_tex(path: str) -> dict:
 if __name__ == "__main__":
     import sys
 
+    if len(sys.argv) != 2:
+        print("用法：python checklist/compliance_check.py <论文.tex>")
+        sys.exit(2)
+    if not Path(sys.argv[1]).is_file():
+        print(f"文件不存在：{sys.argv[1]}")
+        sys.exit(2)
+
     result = check_tex(sys.argv[1])
     if result["issues"]:
         print("发现问题：")

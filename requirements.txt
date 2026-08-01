@@ -1,0 +1,25 @@
+# 数模工具箱依赖（pip install -r requirements.txt）
+# 版本下限为已验证可跑通全部测试的版本（Python 3.11+）
+
+# 数值/数据基础（几乎所有 snippets 都用）
+numpy>=2.5.1
+pandas>=3.0.5
+scipy>=1.18.0
+
+# 机器学习：clustering / pca / neural_network / model_validation 交叉验证
+scikit-learn>=1.9.0
+
+# 时间序列 time_series（ARIMA）
+statsmodels>=0.14.6
+
+# 图论 graph_shortest_path
+networkx>=3.6.1
+
+# 绘图 plotting
+matplotlib>=3.11.1
+
+# Word 模板 templates/build_word_template.py
+python-docx>=1.2.0
+
+# 测试
+pytest>=9.1.1

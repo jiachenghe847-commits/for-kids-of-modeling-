@@ -2,10 +2,24 @@
 
 这是国赛备赛工具箱。赛时使用方式：由一名负责整合的人在这个仓库根目录打开单个 Codex/Claude 会话驱动全程，其他两人不需要各自开会话，直接打开对应文件（`analysis/`、`notation.md`、`templates/`、`snippets/`）手动参考即可。
 
+## 完整求解的质量契约
+
+当用户提供一道新题并要求完整求解、结果文件或论文时，必须执行 `analysis/modeling-workflow.md`，不能从“选一个算法”直接跳到成稿：
+
+1. 默认按 `official-only` 盲测处理，只读取官方题目、附件和空白模板；不得读取 `corpus/`、`建模/` 中的同题论文、答案、代码或数值。只有用户明确要求赛后比较/复盘时才能进入 `postmortem` 阶段。
+2. 运行 `python templates/init_contest_case.py <目录> --case-id <编号> --questions <数量>`，逐问填写 `case.json`：目标量、题意歧义、指标口径、变量、目标、约束、假设和方程到代码/测试映射。
+3. 先实现透明基线，再实现主方法。耦合决策默认联合求解；若用贪心、分层或分解，必须在缩小规模上与联合搜索/精确解比较，不能未经验证声称最优。
+4. 随机算法保存至少 3 个固定种子的原始结果和汇总；迭代算法保存收敛轨迹；优化结果保存逐约束残差；每问至少提供一种独立验证。具体类型见 `analysis/modeling-workflow.md`。
+5. 所有数字写入统一 `artifacts/results.json`，由论文生成器读取，禁止手工转抄。每问正文必须形成“分析 → 模型 → 算法 → 结果 → 验证 → 解释”闭环。
+6. 生成论文前和提交前运行 `python checklist/case_audit.py <目录>`。审计默认只告警；有警告时可以输出草稿，但最终答复必须逐条披露，不能称为完成版。用户明确要求硬门槛时才使用 `--strict`。
+
+不以页数、公式数或图片数机械判定完整性。`examples/示范论文/` 只演示 `compute.py → results.json → gen_paper.py` 的数据链路，不是研究深度或目标篇幅范本。
+
 ## 写论文前先看
 
 - 拿到题先选方法：`analysis/method-selection.md`（题目特征→问题类型→推荐方法→脚手架路径）
-- 想知道成品长什么样：`examples/示范论文/`（10 页完整论文 + 生成它的两个脚本）。这也是推荐的赛时组织方式——`compute.py` 算出所有数字写进 `results.json`，`gen_paper.py` 读 JSON 插值生成 `.tex`，论文里没有一处手工转抄的数字，改数据重跑即可，不存在"代码改了论文忘改"
+- 想看代码到论文的数据链路：`examples/示范论文/`（10 页工具链示范 + 两个生成脚本）。推荐复用其 `compute.py → results.json → gen_paper.py` 组织方式，但不要把它当作研究深度或篇幅范本；完整性按上方质量契约判断
+- 新题完整工作流：`analysis/modeling-workflow.md`（资料隔离→模型卡→代码映射→实验记录→分类验证→论文闭环）
 - 章节结构和篇幅占比：`analysis/paper-structure.md`
 - 写作规范（时态/图表/公式/参考文献）：`analysis/writing-style-guide.md`
 - 评委扣分点自查表：`analysis/judge-deductions.md`
@@ -25,7 +39,7 @@
 ```bash
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
-.venv/bin/python -m pytest checklist/tests/ templates/tests/ snippets/   # 应为 92 passed
+.venv/bin/python -m pytest checklist/tests/ templates/tests/ snippets/   # 应全部通过
 ```
 
 `snippets/` 是一个 Python 包，import 路径从**仓库根目录**算起，三种方式任选：
@@ -56,9 +70,10 @@ PYTHONPATH=. .venv/bin/python ~/somewhere/我的分析.py
 
 ## 提交前必做
 
-1. 跑 `python checklist/compliance_check.py <论文.tex>`，检查摘要、图表 caption、明确身份字段和 AI 工具声明，直到输出"未发现问题"
-2. 逐条过 `checklist/manual_verification.md`，这是强制步骤，不是可选项——尤其是所有数值结果必须来自真实代码输出，不能是 AI 编的"合理数字"
-3. 图表编号约定：团队用全文连续编号（见 notation.md）；语料中约 21% 获奖论文用分章编号，均可获奖，但团队内必须统一（详见 analysis/writing-style-guide.md）
+1. 跑 `python checklist/case_audit.py <比赛目录>`，核对模型卡、代码映射、实验、验证和论文证据链；若有警告必须解决或在交付中披露
+2. 跑 `python checklist/compliance_check.py <论文.tex>`，检查摘要、图表 caption、明确身份字段和 AI 工具声明，直到输出"未发现问题"
+3. 逐条过 `checklist/manual_verification.md`，这是强制步骤，不是可选项——尤其是所有数值结果必须来自真实代码输出，不能是 AI 编的"合理数字"
+4. 图表编号约定：团队用全文连续编号（见 notation.md）；语料中约 21% 获奖论文用分章编号，均可获奖，但团队内必须统一（详见 analysis/writing-style-guide.md）
 
 ## 工具箱本身在迭代
 

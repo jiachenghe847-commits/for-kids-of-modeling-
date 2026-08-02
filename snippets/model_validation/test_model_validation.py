@@ -1,6 +1,14 @@
 import numpy as np
+import pytest
 from sklearn.linear_model import LinearRegression
-from .model import residual_stats, cross_validate_score, sensitivity_analysis
+from .model import (
+    compare_objectives,
+    constraint_residual_report,
+    cross_validate_score,
+    multi_seed_summary,
+    residual_stats,
+    sensitivity_analysis,
+)
 
 
 def test_residual_stats_perfect_fit():
@@ -30,3 +38,42 @@ def test_sensitivity_detects_dominant_param():
     # f = 10*a + 1*b ，对 a 更敏感
     result = sensitivity_analysis(lambda p: 10 * p["a"] + p["b"], {"a": 1.0, "b": 1.0})
     assert result["per_param"]["a"]["elasticity"] > result["per_param"]["b"]["elasticity"]
+
+
+def test_multi_seed_summary_preserves_runs_and_direction():
+    summary = multi_seed_summary(
+        lambda seed: {
+            "objective": np.float64((seed - 2) ** 2),
+            "x": np.array([seed, seed + 1]),
+            "seed": 999,
+        },
+        seeds=[1, 2, 3],
+        sense="min",
+    )
+    assert summary["best_seed"] == 2
+    assert summary["best_objective"] == 0.0
+    assert summary["worst_objective"] == 1.0
+    assert len(summary["runs"]) == 3
+    assert summary["runs"][0]["seed"] == 1
+    assert summary["runs"][0]["x"] == [1, 2]
+
+
+def test_compare_objectives_uses_consistent_degradation_sign():
+    assert compare_objectives(11, 10, sense="min")["degradation"] == 1
+    assert compare_objectives(9, 10, sense="max")["degradation"] == 1
+    assert compare_objectives(11, 10, sense="max")["candidate_is_better"]
+    with pytest.raises(ValueError):
+        compare_objectives(1, 1, sense="unknown")
+
+
+def test_constraint_residual_report_handles_all_relations():
+    report = constraint_residual_report(
+        [
+            {"name": "capacity", "lhs": 9.0, "relation": "<=", "rhs": 10.0},
+            {"name": "demand", "lhs": 5.0, "relation": ">=", "rhs": 5.0},
+            {"name": "balance", "lhs": 3.01, "relation": "==", "rhs": 3.0, "tolerance": 0.001},
+        ]
+    )
+    assert not report["feasible"]
+    assert report["violated"] == ["balance"]
+    assert report["max_violation"] == pytest.approx(0.009)

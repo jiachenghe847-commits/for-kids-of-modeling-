@@ -12,11 +12,17 @@ def test_ga_finds_rastrigin_global_min():
     result = genetic_optimize(_rastrigin, bounds=[(-5.12, 5.12)] * 2)
     assert result["objective"] < 1e-4
     assert np.allclose(result["x"], 0, atol=1e-2)
+    assert result["seed"] == 0
+    assert result["history"]
+    assert result["history"][-1] == result["objective"]
+    assert np.all(np.diff(result["history"]) <= 1e-12)
 
 
 def test_anneal_finds_min():
     result = anneal_optimize(_rastrigin, bounds=[(-5.12, 5.12)] * 2)
     assert result["objective"] < 1e-2
+    assert result["history"]
+    assert result["history"][-1] == result["objective"]
 
 
 def test_tsp_solves_square():

@@ -2,6 +2,124 @@ import numpy as np
 from sklearn.model_selection import cross_val_score
 
 
+def _jsonable(value):
+    if isinstance(value, np.ndarray):
+        return value.tolist()
+    if isinstance(value, np.generic):
+        return value.item()
+    if isinstance(value, dict):
+        return {key: _jsonable(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_jsonable(item) for item in value]
+    return value
+
+
+def multi_seed_summary(run, seeds, objective_key: str = "objective", sense: str = "min") -> dict:
+    """Repeat a stochastic solver and summarize objective stability.
+
+    ``run(seed)`` must return a mapping containing ``objective_key``.  The raw
+    run records are retained so they can be serialized into the experiment
+    artifact instead of reporting only the best run.
+    """
+    if sense not in {"min", "max"}:
+        raise ValueError("sense must be 'min' or 'max'")
+    seeds = [int(seed) for seed in seeds]
+    if not seeds:
+        raise ValueError("seeds must not be empty")
+
+    records = []
+    objectives = []
+    for seed in seeds:
+        result = run(seed)
+        if objective_key not in result:
+            raise KeyError(f"run result is missing {objective_key!r}")
+        objective = float(result[objective_key])
+        records.append({**_jsonable(result), "seed": seed})
+        objectives.append(objective)
+
+    values = np.asarray(objectives, dtype=float)
+    best_index = int(np.argmin(values) if sense == "min" else np.argmax(values))
+    worst_index = int(np.argmax(values) if sense == "min" else np.argmin(values))
+    return {
+        "sense": sense,
+        "objective_key": objective_key,
+        "runs": records,
+        "best_seed": seeds[best_index],
+        "best_objective": float(values[best_index]),
+        "worst_objective": float(values[worst_index]),
+        "mean": float(values.mean()),
+        "std": float(values.std()),
+    }
+
+
+def compare_objectives(candidate: float, reference: float, sense: str = "min") -> dict:
+    """Compare a candidate with an independent reference objective.
+
+    ``degradation`` is positive when the candidate is worse, negative when it
+    is better.  This convention works for both minimization and maximization.
+    """
+    if sense not in {"min", "max"}:
+        raise ValueError("sense must be 'min' or 'max'")
+    candidate = float(candidate)
+    reference = float(reference)
+    degradation = candidate - reference if sense == "min" else reference - candidate
+    scale = max(abs(reference), np.finfo(float).eps)
+    return {
+        "sense": sense,
+        "candidate": candidate,
+        "reference": reference,
+        "degradation": float(degradation),
+        "relative_degradation_pct": float(100.0 * degradation / scale),
+        "candidate_is_better": bool(degradation < 0.0),
+    }
+
+
+def constraint_residual_report(constraints: list[dict], default_tolerance: float = 1e-8) -> dict:
+    """Audit scalar equality and inequality constraints.
+
+    Each constraint is a mapping with ``name``, ``lhs``, ``relation`` (``<=``,
+    ``>=`` or ``==``), ``rhs``, and an optional per-row ``tolerance``.
+    """
+    rows = []
+    for index, item in enumerate(constraints, start=1):
+        relation = item.get("relation")
+        if relation not in {"<=", ">=", "=="}:
+            raise ValueError(f"constraint {index} has invalid relation: {relation!r}")
+        lhs = float(item["lhs"])
+        rhs = float(item["rhs"])
+        tolerance = float(item.get("tolerance", default_tolerance))
+        if tolerance < 0:
+            raise ValueError("constraint tolerance must be non-negative")
+
+        residual = lhs - rhs
+        if relation == "<=":
+            violation = max(residual - tolerance, 0.0)
+        elif relation == ">=":
+            violation = max(-residual - tolerance, 0.0)
+        else:
+            violation = max(abs(residual) - tolerance, 0.0)
+        rows.append(
+            {
+                "name": str(item.get("name") or f"constraint_{index}"),
+                "lhs": lhs,
+                "relation": relation,
+                "rhs": rhs,
+                "tolerance": tolerance,
+                "residual": float(residual),
+                "violation": float(violation),
+                "satisfied": bool(violation == 0.0),
+            }
+        )
+
+    violations = [row["violation"] for row in rows]
+    return {
+        "feasible": all(row["satisfied"] for row in rows),
+        "max_violation": float(max(violations, default=0.0)),
+        "violated": [row["name"] for row in rows if not row["satisfied"]],
+        "constraints": rows,
+    }
+
+
 def residual_stats(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
     """拟合/预测精度指标：R²、RMSE、MAE、MAPE，以及残差数组供画残差图。"""
     y_true = np.asarray(y_true, dtype=float)

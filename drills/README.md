@@ -11,8 +11,10 @@ Task 23 做的是"工具链跑不跑得通"的技术验证。这份指南是给�
 ## 怎么跑
 
 1. 定一个时间盒（建议 1-2 天，别用满 72 小时，重点是压力测试工具箱不是拿奖）
-2. 按 `AGENTS.md` 里写的流程走：先用 `templates/model-proposal-prompt.md` 让 AI 出候选方案 → 团队拍板 → 建模+写代码（尽量用 `snippets/` 起步）→ 用 `templates/paper.tex` 起草正文 → 过 `checklist/`
+2. 按 `analysis/modeling-workflow.md` 走：用 `templates/init_contest_case.py` 建目录 → 只放官方题目/附件 → 填模型卡和歧义审计 → 候选方案拍板 → 基线+主模型 → 实验与独立验证 → JSON 生成论文 → 运行 `case_audit.py` 和合规检查
 3. 全程记录卡手的地方——不管是模板排版问题、脚手架没覆盖到的方法、清单漏检了什么，还是 AI 出的方案不靠谱
+
+演练冻结结果前禁止读取 `corpus/`、`建模/` 中的同题论文。需要和优秀论文比较时，先保存盲测结果、代码和审计报告，再把 `case.json` 的 `phase` 改为 `postmortem`。
 
 ## 演练之后
 

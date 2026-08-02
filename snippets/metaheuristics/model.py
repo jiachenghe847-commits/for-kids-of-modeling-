@@ -8,15 +8,37 @@ def genetic_optimize(func, bounds, seed: int = 0, maxiter: int = 200) -> dict:
     func: 目标函数 f(x)->标量，x 为参数向量；求最大化就返回 -f(x)。
     bounds: 每个变量的 (low, high) 列表，如 [(-5, 5), (-5, 5)]。
     """
-    result = differential_evolution(func, bounds, seed=seed, maxiter=maxiter, polish=True)
+    history = []
+    convergence = []
+
+    def callback(xk, convergence_value):
+        history.append(float(func(xk)))
+        convergence.append(float(convergence_value))
+        return False
+
+    result = differential_evolution(
+        func, bounds, seed=seed, maxiter=maxiter, polish=True, callback=callback
+    )
+    history.append(float(result.fun))
+    history = np.minimum.accumulate(np.asarray(history, dtype=float)).tolist()
     return {"x": result.x, "objective": float(result.fun), "success": bool(result.success),
-            "nit": int(result.nit)}
+            "nit": int(result.nit), "seed": int(seed), "history": history,
+            "convergence": convergence}
 
 
 def anneal_optimize(func, bounds, seed: int = 0, maxiter: int = 1000) -> dict:
     """模拟退火求全局最小值（scipy dual_annealing）。适合多峰、离散化后的连续松弛问题。"""
-    result = dual_annealing(func, bounds, seed=seed, maxiter=maxiter)
-    return {"x": result.x, "objective": float(result.fun), "success": bool(result.success)}
+    history = []
+
+    def callback(_x, objective, _context):
+        history.append(float(objective))
+        return False
+
+    result = dual_annealing(func, bounds, seed=seed, maxiter=maxiter, callback=callback)
+    history.append(float(result.fun))
+    history = np.minimum.accumulate(np.asarray(history, dtype=float)).tolist()
+    return {"x": result.x, "objective": float(result.fun), "success": bool(result.success),
+            "nit": int(result.nit), "seed": int(seed), "history": history}
 
 
 def tsp_anneal(dist: np.ndarray, seed: int = 0, iters: int = 20000, T0: float = 100.0) -> dict:

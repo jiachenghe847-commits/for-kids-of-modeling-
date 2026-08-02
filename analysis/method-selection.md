@@ -1,6 +1,6 @@
 # 建模方法选型索引
 
-拿到题先判断属于哪一类问题，再进对应 `snippets/` 目录看 README。**不要跳过 README 直接抄代码**。下表按"题目特征 → 问题类型 → 推荐方法 → 脚手架路径"组织；一道题常常是多类的组合（如"先聚类分组、再对每组做预测"），按子问题拆开各自选方法。
+拿到题先按 `analysis/modeling-workflow.md` 做目标口径与歧义审计，再判断属于哪一类问题，最后进对应 `snippets/` 目录看 README。**不要跳过模型卡和 README 直接抄代码**。下表按"题目特征 → 问题类型 → 推荐方法 → 脚手架路径"组织；一道题常常是多类的组合（如"先聚类分组、再对每组做预测"），按子问题拆开各自选方法。
 
 ## 一、四大类速判
 
@@ -89,6 +89,8 @@
 | 模型检验（精度指标/交叉验证/灵敏度分析） | `snippets/model_validation/` |
 | 参数估计（反推模型系数） | `snippets/regression/`（`fit_nonlinear`）或 `snippets/metaheuristics/` |
 | 结果可视化 | `snippets/plotting/` |
+
+优化题还必须准备基线、收敛记录、多种子汇总、约束残差和独立算法/缩小规模精确解之一；选到算法只完成了建模工作的一半。用 `snippets/model_validation/` 保存这些证据，并用 `checklist/case_audit.py` 检查缺项。
 
 聚类/PCA/TOPSIS/神经网络前**必须先标准化**；预测/评价出结果后**必须做检验与灵敏度分析**，否则是评委高频扣分点（见 `judge-deductions.md`）。
 

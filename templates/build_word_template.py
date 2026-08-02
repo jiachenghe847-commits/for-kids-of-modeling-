@@ -152,8 +152,14 @@ def build_template(out_path: str) -> None:
 
     doc.add_heading("模型的建立与求解", level=1)
     doc.add_heading("问题一", level=2)
-    doc.add_heading("数据预处理", level=3)
-    _add_placeholder(doc)
+    for heading, prompt in (
+        ("模型建立", "定义变量、参数、目标或待求量、约束和核心方程，并解释推导。"),
+        ("算法设计与求解", "说明基线、主方法、算法步骤、停止条件和结果来源。"),
+        ("结果分析", "报告方案、目标值、约束可行性以及相对基线的改善。"),
+        ("模型验证", "给出收敛、多种子、独立算法、残差或敏感性证据。"),
+    ):
+        doc.add_heading(heading, level=3)
+        _add_placeholder(doc, prompt)
     doc.add_paragraph("图 1  结果图标题", style="图题")
 
     doc.add_heading("灵敏度分析", level=1)

@@ -1,0 +1,479 @@
+{
+  "seed": 2025,
+  "model": {
+    "target_boundary": "top and bottom circular rims, collective full-boundary occlusion",
+    "cloud_radius": 10.0,
+    "cloud_lifetime": 20.0,
+    "gravity": 9.8
+  },
+  "question1": {
+    "plan": {
+      "drone": "FY1",
+      "missile": "M1",
+      "direction_deg": 180.0,
+      "speed": 120.0,
+      "release_time": 1.5,
+      "fuse_delay": 3.6,
+      "bomb_no": 1,
+      "burst_time": 5.1,
+      "release_point": [
+        17620.0,
+        0.0,
+        1800.0
+      ],
+      "burst_point": [
+        17188.0,
+        0.0,
+        1736.496
+      ],
+      "individual_effective_duration": 1.3899999999999704
+    },
+    "strict": {
+      "duration": 1.3919999999992285,
+      "intervals": [
+        [
+          8.0565,
+          9.4485
+        ]
+      ],
+      "dt": 0.001,
+      "n_angles": 360
+    },
+    "center_line_comparison": {
+      "duration": 1.4349999999992047,
+      "intervals": [
+        [
+          8.0135,
+          9.4485
+        ]
+      ],
+      "dt": 0.001,
+      "n_angles": 96
+    }
+  },
+  "question2": {
+    "plan": {
+      "drone": "FY1",
+      "missile": "M1",
+      "direction_deg": 176.91306629582223,
+      "speed": 70.99577780712542,
+      "release_time": 0.008546721755585018,
+      "fuse_delay": 2.4528858987258646,
+      "bomb_no": 1,
+      "burst_time": 2.4614326204814496,
+      "release_point": [
+        17799.394099,
+        0.032676,
+        1800.0
+      ],
+      "burst_point": [
+        17625.502245,
+        9.41055,
+        1770.518419
+      ],
+      "individual_effective_duration": 4.539999999999903
+    },
+    "strict": {
+      "duration": 4.539999999999903,
+      "intervals": [
+        [
+          2.7975000000000003,
+          7.3375
+        ]
+      ],
+      "dt": 0.005,
+      "n_angles": 144
+    }
+  },
+  "question3": {
+    "plans": [
+      {
+        "drone": "FY1",
+        "missile": "M1",
+        "direction_deg": 178.4300637069289,
+        "speed": 80.73784341557999,
+        "release_time": 0.664824380859824,
+        "fuse_delay": 2.9173669085556337,
+        "bomb_no": 1,
+        "burst_time": 3.5821912894154577,
+        "release_point": [
+          17746.343662,
+          1.470582,
+          1800.0
+        ],
+        "burst_point": [
+          17510.890165,
+          7.923754,
+          1758.295955
+        ],
+        "individual_effective_duration": 4.519999999999904
+      },
+      {
+        "drone": "FY1",
+        "missile": "M1",
+        "direction_deg": 178.4300637069289,
+        "speed": 80.73784341557999,
+        "release_time": 1.7999999999999998,
+        "fuse_delay": 3.3,
+        "bomb_no": 2,
+        "burst_time": 5.1,
+        "release_point": [
+          17654.726434,
+          3.981573,
+          1800.0
+        ],
+        "burst_point": [
+          17388.391563,
+          11.281124,
+          1746.639
+        ],
+        "individual_effective_duration": 3.2099999999999316
+      },
+      {
+        "drone": "FY1",
+        "missile": "M1",
+        "direction_deg": 178.4300637069289,
+        "speed": 80.73784341557999,
+        "release_time": 3.0,
+        "fuse_delay": 3.9,
+        "bomb_no": 3,
+        "burst_time": 6.9,
+        "release_point": [
+          17557.87739,
+          6.635955,
+          1800.0
+        ],
+        "burst_point": [
+          17243.117997,
+          15.262697,
+          1725.471
+        ],
+        "individual_effective_duration": 0.6999999999999851
+      }
+    ],
+    "strict": {
+      "duration": 4.6199999999999015,
+      "intervals": [
+        [
+          3.685,
+          8.305
+        ]
+      ],
+      "dt": 0.01,
+      "n_angles": 144
+    }
+  },
+  "question4": {
+    "plans": [
+      {
+        "drone": "FY1",
+        "missile": "M1",
+        "direction_deg": 178.83343222757895,
+        "speed": 116.7092114507492,
+        "release_time": 0.3568847674332747,
+        "fuse_delay": 3.393022573673871,
+        "bomb_no": 1,
+        "burst_time": 3.7499073411071455,
+        "release_point": [
+          17758.356893,
+          0.84799,
+          1800.0
+        ],
+        "burst_point": [
+          17362.441981,
+          8.910109,
+          1743.588249
+        ],
+        "individual_effective_duration": 4.499999999999904
+      },
+      {
+        "drone": "FY2",
+        "missile": "M1",
+        "direction_deg": 272.4054981817752,
+        "speed": 137.5338072743287,
+        "release_time": 3.7100044468187567,
+        "fuse_delay": 6.114027329811653,
+        "bomb_no": 1,
+        "burst_time": 9.82403177663041,
+        "release_point": [
+          12021.416017,
+          890.198593,
+          1400.0
+        ],
+        "burst_point": [
+          12056.709267,
+          50.054119,
+          1216.831482
+        ],
+        "individual_effective_duration": 3.9099999999999167
+      },
+      {
+        "drone": "FY3",
+        "missile": "M1",
+        "direction_deg": 74.58774164640863,
+        "speed": 139.92512393661514,
+        "release_time": 22.3771818286791,
+        "fuse_delay": 0.5003747984066926,
+        "bomb_no": 1,
+        "burst_time": 22.87755662708579,
+        "release_point": [
+          6832.13654,
+          18.530021,
+          700.0
+        ],
+        "burst_point": [
+          6850.743894,
+          86.027186,
+          698.773163
+        ],
+        "individual_effective_duration": 3.1199999999999335
+      }
+    ],
+    "strict": {
+      "duration": 11.529999999999754,
+      "intervals": [
+        [
+          3.9050000000000002,
+          8.405000000000001
+        ],
+        [
+          11.195,
+          15.105
+        ],
+        [
+          25.185000000000002,
+          28.305
+        ]
+      ],
+      "dt": 0.01,
+      "n_angles": 144
+    }
+  },
+  "question5": {
+    "plans": [
+      {
+        "drone": "FY1",
+        "missile": "M1",
+        "direction_deg": 178.92854310551962,
+        "speed": 103.55334837336214,
+        "release_time": 0.7113049939713059,
+        "fuse_delay": 3.3424925844381845,
+        "bomb_no": 1,
+        "burst_time": 4.05379757840949,
+        "release_point": [
+          17726.354865,
+          1.377358,
+          1800.0
+        ],
+        "burst_point": [
+          17380.289086,
+          7.849698,
+          1745.255942
+        ],
+        "individual_effective_duration": 4.499999999999904
+      },
+      {
+        "drone": "FY1",
+        "missile": "M1",
+        "direction_deg": 178.92854310551962,
+        "speed": 103.55334837336214,
+        "release_time": 1.7999999999999998,
+        "fuse_delay": 3.5999999999999996,
+        "bomb_no": 2,
+        "burst_time": 5.3999999999999995,
+        "release_point": [
+          17613.636564,
+          3.485487,
+          1800.0
+        ],
+        "burst_point": [
+          17240.909692,
+          10.45646,
+          1736.496
+        ],
+        "individual_effective_duration": 2.869999999999939
+      },
+      {
+        "drone": "FY1",
+        "missile": "M1",
+        "direction_deg": 178.92854310551962,
+        "speed": 103.55334837336214,
+        "release_time": 3.0,
+        "fuse_delay": 4.2,
+        "bomb_no": 3,
+        "burst_time": 7.2,
+        "release_point": [
+          17489.394273,
+          5.809144,
+          1800.0
+        ],
+        "burst_point": [
+          17054.546256,
+          13.941946,
+          1713.564
+        ],
+        "individual_effective_duration": 1.0999999999999766
+      },
+      {
+        "drone": "FY2",
+        "missile": "M1",
+        "direction_deg": 249.70031333422628,
+        "speed": 133.74698958353196,
+        "release_time": 3.734078766538592,
+        "fuse_delay": 6.986662323225281,
+        "bomb_no": 1,
+        "burst_time": 10.720741089763873,
+        "release_point": [
+          11826.735336,
+          931.596878,
+          1400.0
+        ],
+        "burst_point": [
+          11502.547826,
+          55.18943,
+          1160.814093
+        ],
+        "individual_effective_duration": 3.839999999999918
+      },
+      {
+        "drone": "FY2",
+        "missile": "M1",
+        "direction_deg": 249.70031333422628,
+        "speed": 133.74698958353196,
+        "release_time": 4.8,
+        "fuse_delay": 6.3,
+        "bomb_no": 2,
+        "burst_time": 11.1,
+        "release_point": [
+          11777.275618,
+          797.887638,
+          1400.0
+        ],
+        "burst_point": [
+          11484.949866,
+          7.615164,
+          1205.519
+        ],
+        "individual_effective_duration": 1.739999999999963
+      },
+      {
+        "drone": "FY3",
+        "missile": "M1",
+        "direction_deg": 95.69246244386731,
+        "speed": 123.6890222267795,
+        "release_time": 20.34015099736952,
+        "fuse_delay": 4.822076507656421,
+        "bomb_no": 1,
+        "burst_time": 25.16222750502594,
+        "release_point": [
+          5750.45541,
+          -496.553222,
+          700.0
+        ],
+        "burst_point": [
+          5691.295422,
+          96.943449,
+          586.063133
+        ],
+        "individual_effective_duration": 2.9199999999999378
+      },
+      {
+        "drone": "FY4",
+        "missile": "M2",
+        "direction_deg": 285.6681217504514,
+        "speed": 139.2666086296324,
+        "release_time": 1.5404347191402934,
+        "fuse_delay": 10.35450044973771,
+        "bomb_no": 1,
+        "burst_time": 11.894935168878003,
+        "release_point": [
+          11057.9373,
+          1793.440395,
+          1800.0
+        ],
+        "burst_point": [
+          11447.38048,
+          404.987191,
+          1274.64317
+        ],
+        "individual_effective_duration": 3.7699999999999196
+      },
+      {
+        "drone": "FY5",
+        "missile": "M3",
+        "direction_deg": 115.92513058200194,
+        "speed": 133.78581099856603,
+        "release_time": 12.532276291184763,
+        "fuse_delay": 0.8485146976608758,
+        "bomb_no": 1,
+        "burst_time": 13.38079098884564,
+        "release_point": [
+          12266.978864,
+          -492.08614,
+          1300.0
+        ],
+        "burst_point": [
+          12217.348678,
+          -389.990795,
+          1296.472112
+        ],
+        "individual_effective_duration": 3.7299999999999205
+      }
+    ],
+    "assignment": {
+      "FY1": "M1",
+      "FY2": "M1",
+      "FY3": "M1",
+      "FY4": "M2",
+      "FY5": "M3"
+    },
+    "strict_by_missile": {
+      "M1": {
+        "duration": 13.399999999999714,
+        "intervals": [
+          [
+            4.175,
+            9.075
+          ],
+          [
+            11.885000000000002,
+            15.725000000000001
+          ],
+          [
+            26.795,
+            28.535
+          ],
+          [
+            28.555000000000003,
+            31.475
+          ]
+        ],
+        "dt": 0.01,
+        "n_angles": 144
+      },
+      "M2": {
+        "duration": 3.7699999999999196,
+        "intervals": [
+          [
+            12.805,
+            16.575
+          ]
+        ],
+        "dt": 0.01,
+        "n_angles": 144
+      },
+      "M3": {
+        "duration": 3.7299999999999205,
+        "intervals": [
+          [
+            13.675,
+            17.405
+          ]
+        ],
+        "dt": 0.01,
+        "n_angles": 144
+      }
+    },
+    "total_effective_duration": 20.899999999999554
+  }
+}

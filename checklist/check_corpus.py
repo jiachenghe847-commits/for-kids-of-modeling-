@@ -4,6 +4,7 @@ from pathlib import Path
 
 _FRONT_MATTER = re.compile(r"^---\n(.*?)\n---\n", re.DOTALL)
 _SKIP_NAMES = {"manifest.md", "_fetch-log.md"}
+_REQUIRED_FIELDS = {"year", "problem", "award", "paper_title", "completeness"}
 
 
 def _parse_front_matter(text: str) -> dict:
@@ -32,6 +33,10 @@ def scan_corpus(corpus_dir: str) -> list[dict]:
         fields = _parse_front_matter(path.read_text(encoding="utf-8", errors="replace"))
         if not fields:
             print(f"warning: {path} 缺少可解析的 YAML front matter，已跳过", file=sys.stderr)
+            continue
+        missing = sorted(_REQUIRED_FIELDS - fields.keys())
+        if missing:
+            print(f"warning: {path} 缺少元数据字段 {', '.join(missing)}，已跳过", file=sys.stderr)
             continue
         fields["path"] = str(path)
         results.append(fields)

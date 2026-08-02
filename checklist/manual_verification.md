@@ -16,7 +16,9 @@
 
 ## 格式与合规核对（配合 `checklist/compliance_check.py`）
 
-- [ ] 跑过 `python checklist/compliance_check.py <论文.tex>`，输出"未发现问题"？
+- [ ] 跑过 `python checklist/compliance_check.py <论文.tex>`，摘要、图表 caption、明确身份字段和 AI 声明均通过自动初筛，输出"未发现问题"？
+- [ ] 导出最终 PDF 后，是否人工复查了文件名、文档属性、图片和附件中的学校/队员/参赛编号？这些内容不能仅靠 `.tex` 文本检查。
+- [ ] AI 工具的用途、正文对应标注与参考文献条目是否与实际使用一致？自动检查只能确认声明形式存在。
 - [ ] 参考文献是否按 `analysis/writing-style-guide.md` 的 GB/T 7714 格式？
 - [ ] 是否过了一遍 `analysis/judge-deductions.md` 的每一条？
 

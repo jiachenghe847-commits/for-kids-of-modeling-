@@ -17,8 +17,9 @@ cmpm, cmpr = R["topsis_cmp"]["maxmin"], R["topsis_cmp"]["recip"]
 S = R["sites"]
 
 # —— 产量数据表
-tbl_data = f"""\\begin{{table}}[htbp]
+tbl_data = f"""\\begin{{table}}[!htbp]
   \\centering
+  \\small
   \\caption{{2019--2024 年区域农产品产量原始数据与预处理结果（单位：万吨）}}
   \\label{{tab:data}}
   \\begin{{tabular}}{{l{'c' * len(yrs)}}}
@@ -34,8 +35,9 @@ tbl_data = f"""\\begin{{table}}[htbp]
 \\end{{table}}"""
 
 # —— 决策矩阵表
-tbl_matrix = f"""\\begin{{table}}[htbp]
+tbl_matrix = f"""\\begin{{table}}[!htbp]
   \\centering
+  \\small
   \\caption{{三个候选仓址的原始指标值}}
   \\label{{tab:matrix}}
   \\begin{{tabular}}{{l{'r' * len(R['indicators'])}}}
@@ -51,8 +53,9 @@ tbl_matrix = f"""\\begin{{table}}[htbp]
 \\end{table}"""
 
 # —— 正向化方式对比表
-tbl_cmp = f"""\\begin{{table}}[htbp]
+tbl_cmp = f"""\\begin{{table}}[!htbp]
   \\centering
+  \\small
   \\caption{{两种正向化方式下的熵权与贴近度对比}}
   \\label{{tab:cmp}}
   \\begin{{tabular}}{{lrrrrrrr}}
@@ -69,8 +72,9 @@ tbl_cmp = f"""\\begin{{table}}[htbp]
 
 # —— 灵敏度表
 NAME = {"unit": "单位运费", "volume": "配送量", "fixed": "固定成本"}
-tbl_sens = f"""\\begin{{table}}[htbp]
+tbl_sens = f"""\\begin{{table}}[!htbp]
   \\centering
+  \\small
   \\caption{{单因素灵敏度分析（基准总成本 {R['sens_base']:.2f} 万元）}}
   \\label{{tab:sens}}
   \\begin{{tabular}}{{lrrrrr}}
@@ -86,8 +90,9 @@ tbl_sens = f"""\\begin{{table}}[htbp]
 \\end{table}"""
 
 # —— 最小生成树表
-tbl_mst = f"""\\begin{{table}}[htbp]
+tbl_mst = f"""\\begin{{table}}[!htbp]
   \\centering
+  \\small
   \\caption{{最小生成树选中的干线（总长 {R['mst_total']:.0f} km）}}
   \\label{{tab:mst}}
   \\begin{{tabular}}{{lc}}
@@ -102,8 +107,9 @@ tbl_mst = f"""\\begin{{table}}[htbp]
 \\end{{table}}"""
 
 x = R["lp_x"]
-tbl_lp = f"""\\begin{{table}}[htbp]
+tbl_lp = f"""\\begin{{table}}[!htbp]
   \\centering
+  \\small
   \\caption{{最优运输方案（总运费 {R['lp_cost']:.0f} 万元）}}
   \\label{{tab:lp}}
   \\begin{{tabular}}{{lrrrr}}
@@ -122,20 +128,13 @@ ratio_lo, ratio_hi = R["ratio_bound"]
 TEX = f"""% 由 gen_paper.py 从 results.json 自动生成，请勿手改数字
 % 编译：xelatex demo.tex （跑两趟）
 \\documentclass[12pt]{{article}}
-\\usepackage{{ctex}}
-\\usepackage{{amsmath, amssymb}}
-\\usepackage{{graphicx}}
-\\usepackage{{booktabs}}
-\\usepackage[colorlinks=true, linkcolor=black]{{hyperref}}
-\\usepackage{{geometry}}
-\\geometry{{a4paper, margin=2.5cm}}
-
-\\title{{区域农产品仓储选址与配送网络优化}}
-\\author{{}}
-\\date{{}}
+\\makeatletter
+\\def\\input@path{{{{../../templates/}}}}
+\\makeatother
+\\usepackage{{cumcm-paper}}
 
 \\begin{{document}}
-\\maketitle
+\\cumcmtitle{{区域农产品仓储选址与配送网络优化}}
 
 \\begin{{abstract}}
 随着区域农产品产量的持续增长，原有仓储与配送体系已接近饱和，如何在预测未来产量的基础上科学选址并优化配送网络，是降低流通损耗、提升供应链效率的关键问题。本文针对产量预测、仓址评选与配送网络优化三个子问题，建立了灰色预测、熵权--TOPSIS 综合评价与图论--线性规划相结合的模型体系。
@@ -148,9 +147,8 @@ TEX = f"""% 由 gen_paper.py 从 results.json 自动生成，请勿手改数字
 
 最后对总成本模型作单因素灵敏度分析。在 $\\pm 10\\%$ 扰动范围内，单位运费与配送量的弹性系数均为 {R['sens']['unit']['elasticity']:.4f}，固定成本为 {R['sens']['fixed']['elasticity']:.4f}，三者之和恰为 1，与成本函数的线性结构一致，表明模型对参数扰动的响应稳定可控。
 
-\\vspace{{1em}}
-\\noindent\\textbf{{关键词：}} GM(1,1) 灰色预测；熵权法；TOPSIS；最小生成树；线性规划；灵敏度分析
 \\end{{abstract}}
+\\keywords{{GM(1,1) 灰色预测；熵权法；TOPSIS；最小生成树；线性规划；灵敏度分析}}
 
 \\section{{问题重述}}
 
@@ -169,6 +167,15 @@ TEX = f"""% 由 gen_paper.py 从 results.json 自动生成，请勿手改数字
 \\textbf{{问题二}}属于多指标综合评价。四项指标量纲不一且方向不同（建设投资越小越好，其余越大越好），需先统一方向再赋权。考虑到权重应反映数据本身的区分度而非主观判断，选用熵权法客观赋权，再以 TOPSIS 计算各方案与理想解的相对贴近度。此处正向化方式的选择会实质影响权重分布，需要专门论证。
 
 \\textbf{{问题三}}是复合优化问题，包含三个相互独立的子目标：干线铺设求“最小代价连通所有节点”，对应最小生成树；应急配送求“两点间最短距离”，对应最短路；运量分配求“线性目标下的资源最优配置”，对应线性规划。三者可分别建模、独立求解。
+
+上述三个问题由同一数据层支撑，预测、评价和优化结果最终在检验环节汇合，整体研究流程见图~\\ref{{fig:workflow}}。
+
+\\begin{{figure}}[!htbp]
+  \\centering
+  \\includegraphics[width=0.88\\textwidth]{{fig0_workflow.png}}
+  \\caption{{区域仓储选址与配送优化的总体研究流程}}
+  \\label{{fig:workflow}}
+\\end{{figure}}
 
 \\section{{模型假设}}
 
@@ -246,7 +253,7 @@ R^2 = {R['r2']}, \\quad \\mathrm{{RMSE}} = {R['rmse']}, \\quad \\mathrm{{MAE}} =
 \\end{{equation}}
 MAPE 小于 1\\%，属一级精度。预测 {R['forecast_years'][0]} 年产量 {R['forecast'][0]} 万吨、{R['forecast_years'][1]} 年产量 {R['forecast'][1]} 万吨。拟合效果与残差分布见图~\\ref{{fig:fit}}，残差在零线两侧随机分布，无系统性偏差。
 
-\\begin{{figure}}[htbp]
+\\begin{{figure}}[!htbp]
   \\centering
   \\includegraphics[width=0.75\\textwidth]{{fig1_fit.png}}
   \\caption{{GM(1,1) 拟合效果与残差分布}}
@@ -284,6 +291,8 @@ C_i = \\frac{{D_i^{{-}}}}{{D_i^{{+}} + D_i^{{-}}}} \\in [0, 1] .
 
 需强调的是，熵权反映的是各指标在样本内的区分度，而非指标本身的重要性，不应与 AHP 的主观权重混同解释。
 
+\\FloatBarrier
+
 \\subsection{{问题三：配送网络优化模型}}
 
 \\subsubsection{{干线铺设：最小生成树模型}}
@@ -296,7 +305,7 @@ C_i = \\frac{{D_i^{{-}}}}{{D_i^{{+}} + D_i^{{-}}}} \\in [0, 1] .
 
 {tbl_mst}
 
-\\begin{{figure}}[htbp]
+\\begin{{figure}}[!htbp]
   \\centering
   \\includegraphics[width=0.8\\textwidth]{{fig3_net.png}}
   \\caption{{配送网络拓扑与最小生成树干线方案}}
@@ -329,13 +338,15 @@ C_i = \\frac{{D_i^{{-}}}}{{D_i^{{+}} + D_i^{{-}}}} \\in [0, 1] .
 
 结果符合直觉：单位运费最低的 $A$ 点被优先用满至通过能力上限 70 万吨，北片区剩余需求由次低的 $B$ 承担 {x[1]:.0f} 万吨；南片区则全部交由运费较低的 $D$ 点（{x[3]:.0f} 万吨），运费最高的 $C$ 点不启用。
 
+\\FloatBarrier
+
 \\section{{灵敏度分析}}
 
 对总成本模型 $Z = c \\cdot q + F$（$c$ 为单位运费、$q$ 为配送量、$F$ 为固定成本）作单因素灵敏度分析，在基准点 $c = 12$、$q = 140$、$F = 380$ 附近按 $\\pm 5\\%$、$\\pm 10\\%$ 扰动，基准总成本 {R['sens_base']:.2f} 万元。
 
 {tbl_sens}
 
-\\begin{{figure}}[htbp]
+\\begin{{figure}}[!htbp]
   \\centering
   \\includegraphics[width=0.8\\textwidth]{{fig2_sens.png}}
   \\caption{{总成本对各参数扰动的响应曲线}}
@@ -343,6 +354,8 @@ C_i = \\frac{{D_i^{{-}}}}{{D_i^{{+}} + D_i^{{-}}}} \\in [0, 1] .
 \\end{{figure}}
 
 单位运费与配送量的弹性系数均为 {R['sens']['unit']['elasticity']:.4f}，固定成本为 {R['sens']['fixed']['elasticity']:.4f}。二者之和恰为 1，这与成本函数的线性可加结构一致：可变成本占基准总成本的比例即为其弹性。前两个参数弹性相同，源于它们在模型中以乘积形式对称出现。在 $\\pm 10\\%$ 扰动下总成本波动区间为 {min(min(v['outputs']) for v in R['sens'].values()):.2f}--{max(max(v['outputs']) for v in R['sens'].values()):.2f} 万元，最大偏离基准 {max(abs(o - R['sens_base']) for v in R['sens'].values() for o in v['outputs']) / R['sens_base'] * 100:.2f}\\%，未出现放大效应，模型稳健。
+
+\\FloatBarrier
 
 \\section{{模型评价与推广}}
 
@@ -372,13 +385,20 @@ C_i = \\frac{{D_i^{{-}}}}{{D_i^{{+}} + D_i^{{-}}}} \\in [0, 1] .
 \\bibitem{{ref1}} 邓聚龙. 灰色系统基本方法[M]. 武汉: 华中科技大学出版社, 2005.
 \\bibitem{{ref2}} 司守奎, 孙兆亮. 数学建模算法与应用[M]. 3 版. 北京: 国防工业出版社, 2021.
 \\bibitem{{ref3}} Hwang C L, Yoon K. Multiple Attribute Decision Making: Methods and Applications[M]. Berlin: Springer, 1981.
+\\bibitem{{ai-codex}} OpenAI. Codex CLI, 0.146.0, OpenAI, 使用日期: 2026-08-01.
 \\end{{thebibliography}}
+
+\\begin{{aideclaration}}[AI 工具使用声明]
+
+本文为工具箱示范材料。写作与程序组织过程中使用 OpenAI Codex 辅助生成和修改代码、整理文字；所有模型计算与数值结果均可由本项目代码重新生成，正式参赛时仍须按人工核对清单由队员复核后定稿。
+\\end{{aideclaration}}
 
 \\appendix
 \\section{{支撑文件/材料清单}}
 
-\\begin{{table}}[htbp]
+\\begin{{table}}[!htbp]
   \\centering
+  \\small
   \\caption{{支撑材料清单}}
   \\label{{tab:support}}
   \\begin{{tabular}}{{lll}}
@@ -388,9 +408,10 @@ C_i = \\frac{{D_i^{{-}}}}{{D_i^{{+}} + D_i^{{-}}}} \\in [0, 1] .
     \\texttt{{compute.py}} & Python 源码 & 全部计算，输出 \\texttt{{results.json}} \\\\
     \\texttt{{results.json}} & 数据 & 论文所有数值的唯一来源 \\\\
     \\texttt{{gen\\_paper.py}} & Python 源码 & 由 JSON 生成本文，杜绝手抄误差 \\\\
-    \\texttt{{fig1\\_fit.png}} & 图片 & 图 1 \\\\
-    \\texttt{{fig2\\_sens.png}} & 图片 & 图 3 \\\\
-    \\texttt{{fig3\\_net.png}} & 图片 & 图 2 \\\\
+    \\texttt{{fig0\\_workflow.png}} & 图片 & 总体研究流程图 \\\\
+    \\texttt{{fig1\\_fit.png}} & 图片 & 预测拟合与残差图 \\\\
+    \\texttt{{fig2\\_sens.png}} & 图片 & 灵敏度分析图 \\\\
+    \\texttt{{fig3\\_net.png}} & 图片 & 配送网络图 \\\\
     \\bottomrule
   \\end{{tabular}}
 \\end{{table}}
@@ -399,8 +420,9 @@ C_i = \\frac{{D_i^{{-}}}}{{D_i^{{+}} + D_i^{{-}}}} \\in [0, 1] .
 
 全部计算由 \\texttt{{compute.py}} 完成，共调用工具箱 \\texttt{{snippets/}} 下的七个模块：
 
-\\begin{{table}}[htbp]
+\\begin{{table}}[!htbp]
   \\centering
+  \\small
   \\caption{{程序调用的工具箱模块}}
   \\label{{tab:modules}}
   \\begin{{tabular}}{{ll}}

@@ -24,11 +24,43 @@ from snippets.topsis_entropy.model import entropy_weights, topsis_score
 from snippets.graph_shortest_path.model import shortest_path, minimum_spanning_tree
 from snippets.linear_programming.model import solve_lp
 from snippets.plotting.style import apply_cumcm_style
-from snippets.plotting.plots import fit_comparison, sensitivity_curve
+from snippets.plotting.plots import fit_comparison, sensitivity_curve, workflow_diagram
 
 OUT = pathlib.Path(__file__).parent          # 产物与脚本同目录
 R = {}
 apply_cumcm_style()
+
+# ============ 研究流程图 ============
+workflow_nodes = [
+    "题目数据",
+    "数据预处理",
+    "GM(1,1)产量预测",
+    "熵权-TOPSIS选址评价",
+    "图论构建配送网络",
+    "线性规划分配运量",
+    "模型检验与综合决策",
+]
+workflow_edges = [
+    ("题目数据", "数据预处理"),
+    ("数据预处理", "GM(1,1)产量预测"),
+    ("数据预处理", "熵权-TOPSIS选址评价"),
+    ("数据预处理", "图论构建配送网络"),
+    ("图论构建配送网络", "线性规划分配运量"),
+    ("GM(1,1)产量预测", "模型检验与综合决策"),
+    ("熵权-TOPSIS选址评价", "模型检验与综合决策"),
+    ("线性规划分配运量", "模型检验与综合决策"),
+]
+fig = workflow_diagram(
+    workflow_nodes,
+    workflow_edges,
+    groups={
+        "数据层": workflow_nodes[:2],
+        "模型层": workflow_nodes[2:6],
+        "决策层": workflow_nodes[6:],
+    },
+    output_path=OUT / "fig0_workflow.png",
+)
+plt.close(fig)
 
 # ============ 问题一：产量预测 ============
 YEARS = [2019, 2020, 2021, 2022, 2023, 2024]
@@ -65,7 +97,7 @@ R["mae"], R["mape"] = round(float(rs["mae"]), 4), round(float(rs["mape"]), 4)
 R["resid"] = [round(v, 3) for v in (y - fitted)]
 
 fig = fit_comparison(np.array(YEARS), y, fitted, xlabel="年份", ylabel="产量 / 万吨")
-fig.savefig(f"{OUT}/fig1_fit.png", dpi=150); plt.close(fig)
+fig.savefig(f"{OUT}/fig1_fit.png", dpi=300); plt.close(fig)
 
 # ============ 问题二：仓址评选 ============
 SITES = ["甲", "乙", "丙"]
@@ -132,22 +164,25 @@ fig = sensitivity_curve(
     np.array(R["deltas"]),
     {NAME[k]: v["outputs"] for k, v in R["sens"].items()},
     xlabel="参数相对变化 / %", ylabel="总成本 / 万元", baseline=R["sens_base"])
-fig.savefig(f"{OUT}/fig2_sens.png", dpi=150); plt.close(fig)
+fig.savefig(f"{OUT}/fig2_sens.png", dpi=300); plt.close(fig)
 
 # ============ 网络图 ============
 G = nx.Graph(); G.add_weighted_edges_from(EDGES)
 pos = nx.spring_layout(G, seed=7)
-fig, ax = plt.subplots(figsize=(8, 6))
+fig, ax = plt.subplots(figsize=(7.2, 4.8))
 mst_set = {frozenset((u, v)) for u, v, _ in mst["edges"]}
-nx.draw_networkx_edges(G, pos, ax=ax, edge_color="#CCCCCC", width=1.5)
-nx.draw_networkx_edges(G, pos, ax=ax, width=3, edge_color="#C82423",
+nx.draw_networkx_edges(G, pos, ax=ax, edge_color="#B7BEC7", width=1.2)
+nx.draw_networkx_edges(G, pos, ax=ax, width=2.8, edge_color="#A61B1B",
                        edgelist=[(u, v) for u, v, _ in mst["edges"]])
-nx.draw_networkx_nodes(G, pos, ax=ax, node_color="#2878B5", node_size=900)
+nx.draw_networkx_nodes(G, pos, ax=ax, node_color="#1F4E79", node_size=820,
+                       edgecolors="white", linewidths=1.2)
 nx.draw_networkx_labels(G, pos, ax=ax, font_color="white", font_size=13)
 nx.draw_networkx_edge_labels(G, pos, ax=ax, font_size=9,
+                             bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.82},
                              edge_labels={(u, v): w for u, v, w in EDGES})
-ax.set_title("配送网络与最小生成树（粗红线为选中干线）"); ax.axis("off")
-fig.savefig(f"{OUT}/fig3_net.png", dpi=150, bbox_inches="tight"); plt.close(fig)
+ax.grid(False)
+ax.axis("off")
+fig.savefig(f"{OUT}/fig3_net.png", dpi=300, bbox_inches="tight"); plt.close(fig)
 
 json.dump(R, open(f"{OUT}/results.json", "w"), ensure_ascii=False, indent=1)
 print(json.dumps(R, ensure_ascii=False, indent=1))

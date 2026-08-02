@@ -1,7 +1,7 @@
 # 示范论文：区域农产品仓储选址与配送优化
 
-这是**一篇跑通了的完整论文**，不是模板。11 页，正文里每一个数字都由 `compute.py`
-真实算出来，没有一处是编的。用途有两个：
+这是**一篇跑通了的完整论文**，不是模板。10 页，正文里每一个数字都由 `compute.py`
+真实算出来，没有一处是编的。版式与工具箱模板统一为 B226 竞赛型风格。用途有两个：
 
 1. **看范例**——新队员想知道「一篇能拿奖的论文长什么样」，打开 [demo.pdf](demo.pdf) 从头翻到尾。
 2. **看接线**——想知道工具箱的 `snippets/` 怎么串成一条完整链路，读 `compute.py` 就够了。
@@ -11,7 +11,7 @@
 在仓库任意目录下执行都可以，脚本自己定位仓库根：
 
 ```bash
-.venv/bin/python examples/示范论文/compute.py     # 算数 → results.json + 三张图
+.venv/bin/python examples/示范论文/compute.py     # 算数 → results.json + 四张图
 .venv/bin/python examples/示范论文/gen_paper.py   # 读 JSON → demo.tex
 cd examples/示范论文 && xelatex demo.tex && xelatex demo.tex   # 跑两趟，第二趟解交叉引用
 ```
@@ -39,7 +39,7 @@ cd examples/示范论文 && xelatex demo.tex && xelatex demo.tex   # 跑两趟�
 | 问题一 预测 | GM(1,1) + 级比检验 + 残差检验 | `grey_prediction`、`model_validation` |
 | 问题二 评价 | 熵权法 + TOPSIS，含两种正向化对比 | `topsis_entropy` |
 | 问题三 优化 | 最小生成树、最短路、线性规划 | `graph_shortest_path`、`linear_programming` |
-| 通用环节 | 单因素灵敏度分析、三张配图 | `model_validation`、`plotting` |
+| 通用环节 | 单因素灵敏度分析、四张配图（含研究流程图） | `model_validation`、`plotting` |
 
 写作上也按 [analysis/paper-structure.md](../../analysis/paper-structure.md) 的节次顺序走了一遍：
 摘要独占首页、符号说明表、模型假设编号、灵敏度分析独立成节、模型评价分优缺点、
@@ -59,11 +59,11 @@ cd examples/示范论文 && xelatex demo.tex && xelatex demo.tex   # 跑两趟�
 
 | 文件 | 是什么 | 要不要改 |
 |---|---|---|
-| `compute.py` | 全部计算，输出 `results.json` 和三张图 | 换题目时改这个 |
+| `compute.py` | 全部计算，输出 `results.json` 和四张图 | 换题目时改这个 |
 | `gen_paper.py` | 读 JSON 生成 `demo.tex` | 换题目时改这个 |
 | `results.json` | 计算结果，代码产物 | 不要手改 |
 | `demo.tex` | 论文源码，代码产物 | 不要手改，改了会被覆盖 |
-| `demo.pdf` | 编译结果，11 页 | 产物 |
-| `fig*.png` | 三张配图，代码产物 | 产物 |
+| `demo.pdf` | 编译结果，10 页 | 产物 |
+| `fig*.png` | 四张配图，代码产物 | 产物 |
 
 产物一并入库，是为了让人不装 LaTeX 也能直接翻 PDF。

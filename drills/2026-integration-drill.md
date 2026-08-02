@@ -37,7 +37,7 @@
 
 本次演练**未发现卡手问题**——三个环节（模板编译、脚手架调用、合规检查）都按预期直接跑通，没有遇到宏包报错、接口不好用或 `AGENTS.md` 路径写错的情况。具体核实过的细节：
 
-- `templates/paper.tex` 用 `ctex` + `xelatex`/`pdflatex` 均可编译（本次用 pdflatex，`ctex` 自动探测到 `pdflatex` 引擎并加载了系统 `simsun`/`simhei` 字体，无需额外配置）。
+- 当时的特定 MiKTeX 环境中，`templates/paper.tex` 用 `pdflatex` 成功编译（`ctex` 自动加载系统 `simsun`/`simhei` 字体）。这是历史环境记录，不代表跨平台保证：2026-08-02 复核时，TeX Live 2025 的 pdfLaTeX 因 `ctex`/Fandol 字体模式直接失败，因此项目统一使用 XeLaTeX。
 - `snippets/regression/model.py` 的 `fit_linear(x, y)` 接口签名与 `AGENTS.md`/README 描述一致，`sys.path.insert` 方式导入没有额外依赖问题（只需 `numpy`，已在环境中）。
 - `checklist/compliance_check.py` 对 `\caption` 缺失的检测逻辑（基于 `\begin{table}...\end{table}` 内正则匹配）行为符合预期，删除/恢复后两次结果均与文档描述一致。
 - 唯一算不上"问题"的观察：pdflatex 输出中有一行 `pdflatex: major issue: So far, you have not checked for MiKTeX updates.`，这是 MiKTeX 自身的更新提醒，不影响编译结果，brief 里也已提前说明可忽略。

@@ -5,7 +5,7 @@
 ## 写论文前先看
 
 - 拿到题先选方法：`analysis/method-selection.md`（题目特征→问题类型→推荐方法→脚手架路径）
-- 想知道成品长什么样：`examples/示范论文/`（11 页完整论文 + 生成它的两个脚本）。这也是推荐的赛时组织方式——`compute.py` 算出所有数字写进 `results.json`，`gen_paper.py` 读 JSON 插值生成 `.tex`，论文里没有一处手工转抄的数字，改数据重跑即可，不存在"代码改了论文忘改"
+- 想知道成品长什么样：`examples/示范论文/`（10 页完整论文 + 生成它的两个脚本）。这也是推荐的赛时组织方式——`compute.py` 算出所有数字写进 `results.json`，`gen_paper.py` 读 JSON 插值生成 `.tex`，论文里没有一处手工转抄的数字，改数据重跑即可，不存在"代码改了论文忘改"
 - 章节结构和篇幅占比：`analysis/paper-structure.md`
 - 写作规范（时态/图表/公式/参考文献）：`analysis/writing-style-guide.md`
 - 评委扣分点自查表：`analysis/judge-deductions.md`
@@ -14,7 +14,7 @@
 
 ## 起草论文
 
-- LaTeX 主模板：`templates/paper.tex`。**必须用 xelatex 编译**（`ctex` 宏包不支持 pdflatex）：`xelatex paper.tex` 跑两趟（第二趟解析图表编号与目录）。缺工具链就装 `sudo apt install texlive-xetex texlive-lang-chinese texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended`
+- LaTeX 主模板：`templates/paper.tex`。**项目统一使用 XeLaTeX**：`xelatex paper.tex` 跑两趟（第二趟解析图表编号与目录）。旧演练曾在特定 MiKTeX 字体环境用 pdfLaTeX 编译成功，但当前 TeX Live 2025 会因 `ctex`/Fandol 字体模式失败，因此 pdfLaTeX 不是受支持的跨平台路径。缺工具链就装 `sudo apt install texlive-xetex texlive-lang-chinese texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended`
 - Word 备选模板：运行 `python templates/build_word_template.py <输出路径>` 生成
 - 需要 AI 提建模方案时，用 `templates/model-proposal-prompt.md` 里的提示词模板，不要跳过"先出多方案再拍板"这一步
 
@@ -25,7 +25,7 @@
 ```bash
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
-.venv/bin/python -m pytest checklist/tests/ templates/tests/ snippets/   # 应为 80 passed
+.venv/bin/python -m pytest checklist/tests/ templates/tests/ snippets/   # 应为 92 passed
 ```
 
 `snippets/` 是一个 Python 包，import 路径从**仓库根目录**算起，三种方式任选：
@@ -56,7 +56,7 @@ PYTHONPATH=. .venv/bin/python ~/somewhere/我的分析.py
 
 ## 提交前必做
 
-1. 跑 `python checklist/compliance_check.py <论文.tex>`，直到输出"未发现问题"
+1. 跑 `python checklist/compliance_check.py <论文.tex>`，检查摘要、图表 caption、明确身份字段和 AI 工具声明，直到输出"未发现问题"
 2. 逐条过 `checklist/manual_verification.md`，这是强制步骤，不是可选项——尤其是所有数值结果必须来自真实代码输出，不能是 AI 编的"合理数字"
 3. 图表编号约定：团队用全文连续编号（见 notation.md）；语料中约 21% 获奖论文用分章编号，均可获奖，但团队内必须统一（详见 analysis/writing-style-guide.md）
 

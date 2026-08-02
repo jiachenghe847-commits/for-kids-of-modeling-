@@ -1,27 +1,15 @@
 % cumcm-toolkit/templates/paper.tex
-% 编译：xelatex paper.tex （跑两趟；ctex 宏包不支持 pdflatex）
+% 项目标准编译：在 templates/ 目录运行 xelatex paper.tex（跑两趟）。
 \documentclass[12pt]{article}
-\usepackage{ctex}
-\usepackage{amsmath, amssymb}
-\usepackage{graphicx}
-\usepackage{booktabs}
-\usepackage[colorlinks=true, linkcolor=black]{hyperref}
-\usepackage{geometry}
-\geometry{a4paper, margin=2.5cm}
-
-\title{论文标题}
-\author{}
-\date{}
+\usepackage{cumcm-paper}
 
 \begin{document}
-\maketitle
+\cumcmtitle{论文标题}
 
 \begin{abstract}
 摘要正文。一段话说清问题、方法、关键结果、亮点。
-
-\vspace{1em}
-\noindent\textbf{关键词：} 关键词1；关键词2；关键词3（4-8 个，参见 analysis/writing-style-guide.md）
 \end{abstract}
+\keywords{关键词1；关键词2；关键词3（4--8 个，参见 analysis/writing-style-guide.md）}
 
 \section{问题重述}
 
@@ -29,13 +17,13 @@
 
 \section{模型假设}
 
-\begin{enumerate}
-  \item 假设一
-\end{enumerate}
+\begin{modelassumptions}
+  \item 假设一。
+\end{modelassumptions}
 
 \section{符号说明}
 
-\begin{table}[htbp]
+\begin{table}[!htbp]
   \centering
   \caption{符号说明}
   \begin{tabular}{cl}
@@ -63,6 +51,10 @@
 \begin{thebibliography}{9}
 \bibitem{ref1} 作者. 文献标题[J]. 期刊名, 年份.
 \end{thebibliography}
+
+\begin{aideclaration}[AI 工具使用声明]
+\textbf{请按实际情况填写：}若使用 AI，说明工具、用途与人工核验方式，并在参考文献中列出工具名称、版本/型号、机构和使用日期；若未使用，改为“本参赛队未使用任何AI工具”。
+\end{aideclaration}
 
 \appendix
 \section{支撑文件/材料清单}

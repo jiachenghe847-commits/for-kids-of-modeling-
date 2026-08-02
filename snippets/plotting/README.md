@@ -9,6 +9,7 @@
 - `fit_comparison`：数据点+拟合曲线+残差子图
 - `convergence_curve`：迭代算法的损失/误差收敛
 - `multi_panel`：同构指标并排小图（small multiples）
+- `workflow_diagram`：研究流程、模型结构或求解步骤图（节点+连接关系+可选分组）
 
 **用法**：先调用一次 `style.apply_cumcm_style()`（设置中文字体链、300dpi、配色循环），再调用 `plots.py` 里的函数拿到 `Figure`，自己 `fig.savefig(path)`。
 
@@ -19,6 +20,21 @@ from snippets.plotting.plots import sensitivity_curve
 apply_cumcm_style()
 fig = sensitivity_curve(x, {"开角100°": y1, "开角120°": y2}, "测线距中心点的距离/m", "覆盖宽度/m")
 fig.savefig("figs/图6_覆盖宽度随开角的变化.png")
+```
+
+流程图可直接保存，也会返回 `Figure` 供进一步调整：
+
+```python
+from snippets.plotting.plots import workflow_diagram
+
+nodes = ["数据预处理", "预测模型", "综合评价", "网络优化", "结果检验"]
+workflow_diagram(
+    nodes,
+    list(zip(nodes, nodes[1:])),
+    groups={"数据层": nodes[:1], "模型层": nodes[1:4], "检验层": nodes[4:]},
+    title="研究流程",
+    output_path="figs/图1_研究流程.png",
+)
 ```
 
 **常见坑**：

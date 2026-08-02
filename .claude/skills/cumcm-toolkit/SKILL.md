@@ -10,6 +10,7 @@ description: 国赛（CUMCM）备赛工具箱——论文结构规范、写作�
 ## 写论文前先看
 
 - 拿到题先选方法：`analysis/method-selection.md`（题目特征→问题类型→推荐方法→脚手架路径）
+- 成品参考：`examples/示范论文/`（11 页完整论文 + 生成它的脚本）。赛时照它的组织方式走：`compute.py` 算出全部数字写 `results.json`，`gen_paper.py` 读 JSON 插值出 `.tex`，杜绝手工转抄
 - 章节结构和篇幅占比：`analysis/paper-structure.md`
 - 写作规范：`analysis/writing-style-guide.md`
 - 评委扣分点自查表：`analysis/judge-deductions.md`

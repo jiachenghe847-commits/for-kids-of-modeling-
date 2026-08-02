@@ -5,6 +5,7 @@
 ## 写论文前先看
 
 - 拿到题先选方法：`analysis/method-selection.md`（题目特征→问题类型→推荐方法→脚手架路径）
+- 想知道成品长什么样：`examples/示范论文/`（11 页完整论文 + 生成它的两个脚本）。这也是推荐的赛时组织方式——`compute.py` 算出所有数字写进 `results.json`，`gen_paper.py` 读 JSON 插值生成 `.tex`，论文里没有一处手工转抄的数字，改数据重跑即可，不存在"代码改了论文忘改"
 - 章节结构和篇幅占比：`analysis/paper-structure.md`
 - 写作规范（时态/图表/公式/参考文献）：`analysis/writing-style-guide.md`
 - 评委扣分点自查表：`analysis/judge-deductions.md`

@@ -16,17 +16,41 @@ Task 23 做的是"工具链跑不跑得通"的技术验证。这份指南是给�
 
 演练冻结结果前禁止读取 `corpus/`、`建模/` 中的同题论文。需要和优秀论文比较时，先保存盲测结果、代码和审计报告，再把 `case.json` 的 `phase` 改为 `postmortem`。
 
-## 已有的一次完整演练
+## 已有的两次完整演练
 
-[`2025-A-smoke-screen/`](2025-A-smoke-screen/) 是照上面流程走完的 2025 A 题（烟幕干扰弹投放策略），五问全解、可复现：
+### 2025 B 题：碳化硅外延层厚度（走完整质量契约）
+
+[`2025-B-sic-epilayer/`](2025-B-sic-epilayer/) 是唯一一次把 `case.json` 证据链也跑完的演练——
+`init_contest_case.py` → 模型卡 → 基线 + 主方法 → 分类验证 → `results.json` → 论文 →
+`case_audit.py`（0 警告）+ `compliance_check.py`（未发现问题）：
+
+```bash
+.venv/bin/python drills/2025-B-sic-epilayer/src/compute.py       # 约 25 秒
+.venv/bin/python drills/2025-B-sic-epilayer/src/make_figures.py
+.venv/bin/python drills/2025-B-sic-epilayer/paper/gen_paper.py
+```
+
+想看「质量契约落到一道真题上是什么样」，从这个目录开始。它示范了三件事：把题目里最难的那个
+未知量（折射率）正面解决而不是绕过去；把走不通的路线连同它的条件数一起报告；判据不设人为阈值。
+
+### 2025 A 题：烟幕干扰弹投放策略（工具链演练）
+
+[`2025-A-smoke-screen/`](2025-A-smoke-screen/) 是照上面流程走完的 2025 A 题，五问全解、可复现：
 
 ```bash
 .venv/bin/python drills/2025-A-smoke-screen/solve.py     # 约一分钟，固定种子 2025
 .venv/bin/python drills/2025-A-smoke-screen/make_artifacts.py
 ```
 
-拿它当参照时注意三点：**一，** 它是盲测演练不是获奖范本，问题五用分层配对加边际追加，目录 README 里已声明只是可复现的启发式可行解、不声称全局最优；**二，** 它演示的是「官方输入 → 模型 → results.json → 论文和官方 xlsx」这条链怎么接，值得抄的是这个组织方式；**三，** 它没有建 `case.json`，所以 `case_audit.py` 的那套模型卡证据链在它身上没跑过——你自己的演练要补上这一步。
+拿它当参照时注意三点：**一，** 它是盲测演练不是获奖范本，问题五用分层配对加边际追加，目录 README 里已声明只是可复现的启发式可行解、不声称全局最优；**二，** 它演示的是「官方输入 → 模型 → results.json → 论文和官方 xlsx」这条链怎么接，值得抄的是这个组织方式；**三，** 它没有建 `case.json`，所以 `case_audit.py` 的那套模型卡证据链在它身上没跑过——要看那一步，去上面的 2025 B 题。
+
+两次演练都不是获奖范本，各自的局限写在自己的 README 和论文「模型的缺点」一节里。
 
 ## 演练之后
 
 把发现的问题整理成一份 `drills/<日期>-real-drill.md`（格式参考 `2026-integration-drill.md`），然后回去修 `analysis/`、`templates/`、`snippets/`、`checklist/` 里对应的地方——这是"设计原则"里说的持续迭代，不是演练完就结束了。
+
+已有两份复盘记录：
+
+- [`2026-08-03-completeness.md`](2026-08-03-completeness.md) —— 2025 B 题演练与官方优秀论文 B060、B157 的对比复盘。核心发现是**工具箱早就把体量目标量化好了（`analysis/paper-structure.md`），但交稿前没有任何东西拿产出去比对它**，于是一篇 16 页、附录空白、图数只有中位值 29% 的论文以「0 个警告」通过了审计。由此新增了 `checklist/paper_completeness.py` 完备性对标、`templates/appendix_code.py` 附录代码内联，以及联合拟合、子区间漂移扫描、置信区间/CV/Bootstrap 等能力。
+- [`2026-integration-drill.md`](2026-integration-drill.md) —— 骨架级工具链验证（不涉及真实建模）。

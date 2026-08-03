@@ -5,11 +5,14 @@
 **什么时候用哪个函数**：
 
 - `sensitivity_curve`：灵敏度/参数扫描（多条曲线+可选基准线）
+- `errorbar_comparison`：带误差棒的结果对比（方案/工况/角度 × 结果±不确定度）
 - `heatmap`：空间分布、方案矩阵、相关系数
 - `fit_comparison`：数据点+拟合曲线+残差子图
 - `convergence_curve`：迭代算法的损失/误差收敛
 - `multi_panel`：同构指标并排小图（small multiples）
 - `workflow_diagram`：研究流程、模型结构或求解步骤图（节点+连接关系+可选分组）
+
+算出了置信区间（`snippets/statistics` 的 `confidence_interval` / `bootstrap_ci`）就该用 `errorbar_comparison` 画出来。只画点不画误差棒，等于把「这两个结果到底有没有差别」留给评委猜。
 
 **用法**：先调用一次 `style.apply_cumcm_style()`（设置中文字体链、300dpi、配色循环），再调用 `plots.py` 里的函数拿到 `Figure`，自己 `fig.savefig(path)`。
 

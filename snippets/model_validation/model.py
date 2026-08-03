@@ -168,3 +168,162 @@ def sensitivity_analysis(func, base_params: dict, deltas=(-0.1, -0.05, 0.05, 0.1
                 sens.append(((out - base_val) / base_val) / d)
         result[name] = {"outputs": row, "elasticity": float(np.mean(sens)) if sens else float("nan")}
     return {"base": base_val, "per_param": result}
+
+
+def joint_fit(datasets, forward, shared_names, local_names, x0_shared, x0_local,
+              bounds_shared=None, bounds_local=None, **least_squares_kwargs) -> dict:
+    """多工况联合拟合：几组数据共享一部分参数，各自保留一部分参数。
+
+    **什么时候用**：同一个对象在不同条件下测了好几组数据（不同角度、不同温度、
+    不同批次），而其中一些物理量在各组之间**本来就该相同**。这时把各组分开拟合再
+    取平均，等于扔掉了「它们必须相同」这条硬约束——各组会各自漂到不同的值，
+    组间散布反而成了主要误差来源。联合拟合把共享参数强制绑成一个，散布自然消失。
+
+    2025 B 题演练就吃了这个亏：两个入射角各拟各的，厚度分别是 7.4517 和 7.5925 µm，
+    角度间半散布 0.0704 µm 成了主导不确定度；而同题的官方优秀论文 B157 用双角联合
+    拟合共享厚度与色散参数，从源头上避免了这个问题。
+
+    参数
+    ----
+    datasets     : [{"x": ..., "y": ...}, ...]，每组一个字典，可另带任意元信息
+    forward      : forward(shared, local, dataset) -> 预测值，形状与 dataset["y"] 相同
+                   shared/local 都是 {参数名: 值} 字典
+    shared_names : 各组共享的参数名
+    local_names  : 每组各自独立的参数名
+    x0_shared    : 共享参数初值，长度与 shared_names 一致
+    x0_local     : 每组的局部参数初值，形状 (组数, len(local_names))
+    bounds_shared / bounds_local : (下界, 上界) 元组，与对应初值同长；None 表示不设界
+
+    返回
+    ----
+    ``shared`` 共享参数估计；``local`` 逐组的局部参数；``separate`` 各组单独拟合的
+    结果；``comparison`` 两种做法的对比——**这一项才是报告里要写的东西**：
+    它给出单独拟合时共享参数的组间散布，以及联合拟合把它压到了多少。
+    """
+    from scipy.optimize import least_squares
+
+    datasets = list(datasets)
+    n_sets, n_shared, n_local = len(datasets), len(shared_names), len(local_names)
+    x0_local = np.atleast_2d(np.asarray(x0_local, dtype=float))
+    if x0_local.shape != (n_sets, n_local):
+        raise ValueError(f"x0_local 形状应为 ({n_sets}, {n_local})，实际 {x0_local.shape}")
+
+    def _pack(shared, local):
+        return np.concatenate([np.asarray(shared, dtype=float), np.asarray(local, dtype=float).ravel()])
+
+    def _unpack(vector):
+        shared = dict(zip(shared_names, vector[:n_shared]))
+        block = vector[n_shared:].reshape(n_sets, n_local)
+        return shared, [dict(zip(local_names, row)) for row in block]
+
+    def _residuals(vector):
+        shared, locals_ = _unpack(vector)
+        return np.concatenate([
+            (np.asarray(forward(shared, locals_[i], data), dtype=float)
+             - np.asarray(data["y"], dtype=float)).ravel()
+            for i, data in enumerate(datasets)
+        ])
+
+    def _stack_bounds():
+        if bounds_shared is None and bounds_local is None:
+            return (-np.inf, np.inf)
+        lo_s, hi_s = bounds_shared if bounds_shared else ([-np.inf] * n_shared, [np.inf] * n_shared)
+        lo_l, hi_l = bounds_local if bounds_local else ([-np.inf] * n_local, [np.inf] * n_local)
+        return (_pack(lo_s, np.tile(lo_l, (n_sets, 1))), _pack(hi_s, np.tile(hi_l, (n_sets, 1))))
+
+    fit = least_squares(_residuals, _pack(x0_shared, x0_local),
+                        bounds=_stack_bounds(), **least_squares_kwargs)
+    shared, locals_ = _unpack(fit.x)
+
+    # 对照组：每组单独拟合，共享参数也各拟各的——这正是「不联合」时会发生的事
+    separate = []
+    for i, data in enumerate(datasets):
+        def _one(vector, data=data):
+            s, l = dict(zip(shared_names, vector[:n_shared])), dict(zip(local_names, vector[n_shared:]))
+            return (np.asarray(forward(s, l, data), dtype=float)
+                    - np.asarray(data["y"], dtype=float)).ravel()
+
+        lo_s, hi_s = bounds_shared if bounds_shared else ([-np.inf] * n_shared, [np.inf] * n_shared)
+        lo_l, hi_l = bounds_local if bounds_local else ([-np.inf] * n_local, [np.inf] * n_local)
+        one_bounds = ((-np.inf, np.inf) if bounds_shared is None and bounds_local is None
+                      else (np.concatenate([lo_s, lo_l]), np.concatenate([hi_s, hi_l])))
+        solo = least_squares(_one, np.concatenate([x0_shared, x0_local[i]]),
+                             bounds=one_bounds, **least_squares_kwargs)
+        separate.append({
+            "shared": dict(zip(shared_names, solo.x[:n_shared])),
+            "local": dict(zip(local_names, solo.x[n_shared:])),
+            "rms": float(np.sqrt(np.mean(solo.fun ** 2))),
+        })
+
+    comparison = {}
+    for j, name in enumerate(shared_names):
+        values = [s["shared"][name] for s in separate]
+        spread = (max(values) - min(values)) / 2.0
+        mean = float(np.mean(values))
+        comparison[name] = {
+            "joint": float(fit.x[j]),
+            "separate": [float(v) for v in values],
+            "separate_mean": mean,
+            # 单独拟合时这个「本该相同」的参数散布了多少——联合拟合消掉的就是它
+            "separate_half_spread": float(spread),
+            "separate_relative_spread": float(spread / abs(mean)) if mean else float("nan"),
+            "joint_minus_separate_mean": float(fit.x[j] - mean),
+        }
+
+    return _jsonable({
+        "shared": shared,
+        "local": locals_,
+        "rms": float(np.sqrt(np.mean(fit.fun ** 2))),
+        "cost": float(fit.cost),
+        "success": bool(fit.success),
+        "n_datasets": n_sets,
+        "separate": separate,
+        "comparison": comparison,
+    })
+
+
+def subrange_drift_scan(x, y, estimator, windows) -> dict:
+    """把待求量在数据的不同子区间上各算一遍，看它漂不漂——系统误差探测器。
+
+    **为什么这该是标准动作**：模型里没建进去的系统效应（色散、老化、季节性、
+    量程非线性）通常不会让残差变得难看，而是让**估计值随所用数据区间平移**。
+    只在全量数据上算一次，这种漂移完全看不见；分区间各算一次，它立刻暴露。
+
+    2025 B 题演练里这个扫描测出光程随波段漂移 12%（硅）和 34%（碳化硅），
+    直接解释了三篇论文结果分歧的来源——而当时它只是被当作波段选择的论证，
+    没意识到它是个通用工具。
+
+    参数
+    ----
+    x, y      : 完整数据
+    estimator : estimator(x_sub, y_sub) -> 标量，在一个子区间上给出待求量
+    windows   : [(lo, hi), ...]，按 x 的取值划定的子区间（闭区间）
+
+    返回的 ``drift_relative`` 是最大最小值之差除以中位数；``monotonic`` 说明漂移
+    是不是单调的——单调漂移几乎一定是没建模的系统效应，来回跳则更像噪声。
+    """
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    rows = []
+    for lo, hi in windows:
+        mask = (x >= lo) & (x <= hi)
+        if mask.sum() < 2:
+            raise ValueError(f"子区间 [{lo}, {hi}] 内不足 2 个数据点")
+        rows.append({"window": [float(lo), float(hi)], "n_points": int(mask.sum()),
+                     "value": float(estimator(x[mask], y[mask]))})
+
+    values = np.array([r["value"] for r in rows], dtype=float)
+    median = float(np.median(values))
+    spread = float(values.max() - values.min())
+    diffs = np.diff(values)
+    return _jsonable({
+        "windows": rows,
+        "values": values,
+        "median": median,
+        "min": float(values.min()),
+        "max": float(values.max()),
+        "drift_absolute": spread,
+        "drift_relative": float(spread / abs(median)) if median else float("nan"),
+        "monotonic": bool(np.all(diffs > 0) or np.all(diffs < 0)) if diffs.size else True,
+        "full_range_value": float(estimator(x, y)),
+    })

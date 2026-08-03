@@ -30,11 +30,14 @@
 | `templates/paper_template.docx` | 与 LaTeX 对齐页面、字体、标题、题注和页码的 Word 备选模板；由 `build_word_template.py` 生成 |
 | `templates/model-proposal-prompt.md` | 赛时让 AI 出多个建模方案的提示词模板 |
 | `templates/init_contest_case.py` | 初始化带 `case.json` 研究契约的比赛目录，默认只允许官方输入；字段用尖括号 `<...>` 给出填写口径，审计器一律判为未填写 |
+| `templates/appendix_code.py` | 把源码目录渲染成论文附录的「程序代码」一节（配 `cumcm-paper.sty` 的 `\codefile` 宏）。官方优秀论文附录占全文中位 49.9%，正文只写「程序见支撑材料」等于白丢一半篇幅 |
 | `snippets/<方法名>/` | 21 个建模脚手架，按四大类+横向环节分：分类（聚类/判别·SVM·决策树·随机森林·朴素贝叶斯·Logistic/BP 神经网络）、优化（线性·整数·非线性·多目标规划/图论最短路·最小生成树·网络流/遗传·模拟退火/动态规划/蒙特卡洛）、预测（回归·插值·SVR/ARIMA/灰色/马尔可夫/BP）、评价降维（AHP/TOPSIS·熵权/模糊综合/PCA·因子分析·典型相关/灰色关联）、统计分析（假设检验/方差分析/卡方/相关）、机理（微分方程）、横向（数据预处理/模型检验/绘图）。每个含代码+README+测试，选型见 `analysis/method-selection.md` |
 | `checklist/compliance_check.py` | 自动合规初筛（摘要/图表 caption/明确身份字段/AI 声明），交稿前跑；PDF 属性和语义性问题仍需人工复核 |
-| `checklist/case_audit.py` | 研究质量审计：逐问题检查口径、模型、代码映射、基线、收敛、约束、独立验证和论文证据；默认只告警。**只查结构**（字段填没填、登记的文件在不在），不判断证据是否成立，「0 个警告」不是质量背书 |
+| `checklist/case_audit.py` | 研究质量审计：逐问题检查口径、模型、代码映射、基线、收敛、约束、独立验证和论文证据；默认只告警。**只查结构**（字段填没填、登记的文件在不在），不判断证据是否成立，「0 个警告」不是质量背书。报告末尾附完备性对标分节 |
+| `checklist/paper_completeness.py` | 完备性对标：把论文的摘要字数、正文字数、图表数、附录占比、各章占比与官方优秀论文（2023，n=14）的实测四分位逐项对照。**不计入警告数、不影响 `--strict`**——篇幅达标和研究质量是两件事。基准直接由 `analysis/paper-structure.md` 附表二的原始数据算出，可单独运行 |
 | `checklist/manual_verification.md` | **人工核对清单——AI 起草的所有数值/公式定稿前必须过这道关**；`case_audit.py` 查不到的内容真伪由这份清单兜底 |
 | `examples/示范论文/` | **10 页工具链示范，不是深度/篇幅范本**——展示数据预处理→建模→验证→JSON→LaTeX 的单一数据源链路；完整比赛论文还必须满足 `analysis/modeling-workflow.md` |
+| `drills/2025-B-sic-epilayer/` | 2025 B 题（碳化硅外延层厚度）**走完整质量契约的盲测演练**：唯一一次把 `case.json` 证据链也跑完的演练，`case_audit.py` 0 警告、`compliance_check.py` 未发现问题、论文逐字节可复现。折射率与厚度从附件光谱联合拟合，不引用任何外部材料常数。想看质量契约落到真题上是什么样，从这里开始 |
 | `drills/2025-A-smoke-screen/` | 2025 A 题（烟幕干扰弹）**五问全解的盲测演练**：只用官方题目 PDF 和空白结果模板，不看同题论文。`solve.py` 约一分钟跑完，产出 `results.json`、三份官方 xlsx 和完整论文 PDF。这是「一道真题从头做到尾长什么样」的参照，不是获奖范本——问题五用的是分层配对启发式，本身就声明了不是全局最优 |
 | `drills/README.md` | 赛前模拟演练怎么做 |
 

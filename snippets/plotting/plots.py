@@ -24,6 +24,37 @@ def sensitivity_curve(
     return fig
 
 
+def errorbar_comparison(
+    labels: list,
+    values: np.ndarray,
+    errors: np.ndarray,
+    ylabel: str,
+    reference: float | None = None,
+    reference_label: str = "参考值",
+) -> Figure:
+    """带误差棒的结果对比图：横轴是方案/工况/角度，纵轴是结果加不确定度。
+
+    算出了置信区间（`snippets/statistics` 的 `confidence_interval` / `bootstrap_ci`）
+    就该画出来。只画柱高不画误差棒，等于把「这两个结果到底有没有差别」这个问题
+    留给评委猜。``errors`` 可以是一维（对称）或形状 (2, n) 的上下不对称误差。
+    """
+    values = np.asarray(values, dtype=float)
+    errors = np.asarray(errors, dtype=float)
+    x = np.arange(len(labels))
+    fig, ax = plt.subplots(figsize=(7.2, 4.5))
+    ax.errorbar(x, values, yerr=errors, fmt="o", capsize=5, capthick=1.2,
+                markersize=6, linewidth=1.4)
+    if reference is not None:
+        ax.axhline(reference, color="gray", linestyle="--", linewidth=1, label=reference_label)
+        ax.legend()
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels)
+    ax.set_xlim(-0.5, len(labels) - 0.5)
+    ax.set_ylabel(ylabel)
+    ax.grid(axis="y", alpha=0.3)
+    return fig
+
+
 def heatmap(
     matrix: np.ndarray,
     row_labels: list,

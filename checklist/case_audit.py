@@ -18,12 +18,26 @@ import re
 from pathlib import Path
 from typing import Any
 
+try:  # 直接跑脚本时 checklist/ 已在 sys.path 上；从仓库根目录当包导入时走下面这条
+    from paper_completeness import completeness_report
+    from paper_completeness import format_text as _completeness_text
+except ImportError:  # pragma: no cover
+    from checklist.paper_completeness import completeness_report
+    from checklist.paper_completeness import format_text as _completeness_text
+
 
 SCOPE = "structural"
 SCOPE_NOTE = (
     "本工具只检查证据是否存在且可定位，不判断证据是否成立；"
     "内容真伪见 checklist/manual_verification.md"
 )
+
+# 完备性对标（论文体量 vs 获奖论文实测分布）刻意**不**计入 warning_count，也不影响
+# --strict 的退出码，理由有两条：
+#   一、篇幅达标和研究质量是两件事。把「图不够多」和「缺独立验证」堆进同一个计数里，
+#      会让人以为凑几张图就能提质量；
+#   二、现有「0 个警告」的语义是「证据链结构完整」，掺进体量指标就变味了。
+# 它以独立分节呈现，看得见但不阻断。基准与口径见 checklist/paper_completeness.py。
 
 TASK_TYPES = {"direct", "mechanism", "simulation", "optimization", "prediction", "evaluation"}
 INDEPENDENT_VALIDATIONS = {
@@ -330,12 +344,14 @@ def audit_case(case_dir: str | Path) -> dict:
         _warning(warnings, "paper.trace", "论文生成器的数据源必须与 results_path 一致")
 
     metrics = {"questions": len(questions), "skipped_questions": skipped}
+    completeness = None
     tex_value = paper.get("tex_path")
     if _path_exists(case_dir, tex_value):
         tex_path = Path(tex_value)
         if not tex_path.is_absolute():
             tex_path = case_dir / tex_path
         metrics.update(_paper_metrics(tex_path))
+        completeness = completeness_report(tex_path)
         tex_text = tex_path.read_text(encoding="utf-8")
         for question in questions:
             section = question.get("paper", {}).get("section", "")
@@ -350,6 +366,8 @@ def audit_case(case_dir: str | Path) -> dict:
         "warning_count": len(warnings),
         "warnings": warnings,
         "metrics": metrics,
+        # 见文件头部注释：体量对标独立于警告计数
+        "completeness": completeness,
     }
 
 
@@ -364,6 +382,10 @@ def format_text(report: dict) -> str:
         lines.append(f"注意：{skipped} 个问题因任务类型未分类，跳过了后续全部检查")
     lines.append("指标：" + "，".join(f"{key}={value}" for key, value in metrics.items()))
     lines.append(f"范围：{SCOPE_NOTE}")
+    completeness = report.get("completeness")
+    if completeness:
+        lines.append("")
+        lines.append(_completeness_text(completeness))
     return "\n".join(lines)
 
 

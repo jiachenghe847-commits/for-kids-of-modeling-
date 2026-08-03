@@ -77,6 +77,20 @@
 \section{支撑文件/材料清单}
 % 2022 年起获奖论文标配，见 analysis/judge-deductions.md 对应检查项
 
+% 程序代码：附录带全量代码是近年获奖论文的常态——官方 2023 年 14 篇实测附录占全文
+% 27.6%~72.1%（中位 49.9%，见 analysis/paper-structure.md）。只写「程序见支撑材料」
+% 等于白丢一半篇幅，`checklist/case_audit.py` 的完备性对标会把它判为「偏低」。
+%
+% 两种写法，任选其一：
+% (1) 由生成器自动灌入（推荐，代码改了论文自动跟着变）：
+%       from appendix_code import appendix_section
+%       tex += appendix_section(src_dir="../src", tex_dir="paper")
+%     或命令行：python templates/appendix_code.py src --tex-dir paper -o paper/appendix_code.tex
+%     然后在这里 \input{appendix_code}
+% (2) 手写，每个文件一行：
+%       \codefile{../src/model.py}{Python}{src/model.py}
+%     三个参数依次是：相对本 .tex 的读取路径、listings 语言名、给人看的显示名
 \section{程序代码}
+% \input{appendix_code}
 
 \end{document}

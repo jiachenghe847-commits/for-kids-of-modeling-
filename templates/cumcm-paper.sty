@@ -14,10 +14,15 @@
 \RequirePackage[section]{placeins}
 \RequirePackage{fancyhdr}
 \RequirePackage{xcolor}
+\RequirePackage{listings}
 \RequirePackage{hyperref}
 
 \geometry{a4paper,left=2.35cm,right=2.35cm,top=2.10cm,bottom=2.20cm,headheight=14pt}
 \setmainfont{TeX Gyre Termes}
+% 等宽字体必须换掉默认的 Latin Modern Mono：它没有希腊字母，源码注释里的
+% σ、Δ、√ 会整个丢字（实测 lmmono8-regular 报 Missing character）。
+% DejaVu Sans Mono 覆盖希腊字母与常见数学符号，且是各发行版的常备字体。
+\setmonofont{DejaVu Sans Mono}[Scale=0.85]
 \setstretch{1.32}
 \setlength{\parindent}{2em}
 \setlength{\parskip}{0pt}
@@ -88,5 +93,39 @@
   \section*{#1}
   \addcontentsline{toc}{section}{#1}
 }{\par}
+
+% 附录源码排版。附录带全量代码是近年获奖论文的常态——官方 2023 年 14 篇实测
+% 附录占全文 27.6%~72.1%（中位 49.9%，见 analysis/paper-structure.md），
+% 正文里只写「程序见支撑材料」等于白丢一半篇幅。
+% 用 listings 而非 minted：minted 需要 -shell-escape 和 Python 的 pygments，
+% 赛场机器上多一个装不上的依赖就是多一个风险点；listings 是 TeX Live 自带的。
+\lstdefinestyle{cumcmcode}{
+  basicstyle=\ttfamily\scriptsize,
+  breaklines=true,
+  breakatwhitespace=false,
+  showstringspaces=false,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=6pt,
+  frame=single,
+  framerule=0.3pt,
+  rulecolor=\color{gray!55},
+  keywordstyle=\color{blue!65!black},
+  commentstyle=\color{green!42!black},
+  stringstyle=\color{purple!68!black},
+  extendedchars=true,
+  tabsize=4,
+  columns=flexible,
+  xleftmargin=1.6em,
+  aboveskip=0.8em,
+  belowskip=0.8em,
+}
+\lstset{style=cumcmcode}
+
+% \codefile{读取路径}{语言}{显示名}——附录里插入一整个源码文件。
+% 读取路径按 .tex 所在目录算，可能是一长串 ../；显示名是给人看的短名，两者必须分开。
+\newcommand{\codefile}[3]{%
+  \lstinputlisting[language=#2,caption={\texttt{\detokenize{#3}}},label={lst:\detokenize{#3}}]{#1}%
+}
 
 \AtBeginDocument{\zihao{-4}\songti}

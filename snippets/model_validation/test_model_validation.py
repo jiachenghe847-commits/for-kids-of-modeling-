@@ -5,10 +5,23 @@ from .model import (
     compare_objectives,
     constraint_residual_report,
     cross_validate_score,
+    joint_fit,
     multi_seed_summary,
     residual_stats,
     sensitivity_analysis,
+    subrange_drift_scan,
 )
+
+
+def _two_condition_datasets(noise=0.3, seed=0, slope=2.5, intercepts=(1.0, -0.5)):
+    """两组数据共享斜率、各有截距——2025-B 双角共享厚度的最小复现。"""
+    rng = np.random.default_rng(seed)
+    x = np.linspace(0, 10, 60)
+    return [{"x": x, "y": slope * x + b + rng.normal(0, noise, x.size)} for b in intercepts]
+
+
+def _linear(shared, local, data):
+    return shared["a"] * data["x"] + local["b"]
 
 
 def test_residual_stats_perfect_fit():
@@ -77,3 +90,71 @@ def test_constraint_residual_report_handles_all_relations():
     assert not report["feasible"]
     assert report["violated"] == ["balance"]
     assert report["max_violation"] == pytest.approx(0.009)
+
+
+def test_joint_fit_recovers_the_shared_parameter():
+    result = joint_fit(_two_condition_datasets(), _linear, ["a"], ["b"], [1.0], [[0.0], [0.0]])
+    assert result["success"]
+    assert result["shared"]["a"] == pytest.approx(2.5, abs=0.03)
+    assert result["local"][0]["b"] == pytest.approx(1.0, abs=0.15)
+    assert result["local"][1]["b"] == pytest.approx(-0.5, abs=0.15)
+
+
+def test_joint_fit_reports_the_spread_that_separate_fits_would_have_produced():
+    """报告里要写的是这一项：不联合的话，本该相同的参数会散布多少。"""
+    result = joint_fit(_two_condition_datasets(), _linear, ["a"], ["b"], [1.0], [[0.0], [0.0]])
+    comparison = result["comparison"]["a"]
+    assert len(comparison["separate"]) == 2
+    assert comparison["separate_half_spread"] > 0
+    # 联合解不该跑到两个单独解的区间之外
+    assert min(comparison["separate"]) <= comparison["joint"] <= max(comparison["separate"])
+    assert comparison["separate_relative_spread"] == pytest.approx(
+        comparison["separate_half_spread"] / abs(comparison["separate_mean"])
+    )
+
+
+def test_joint_fit_beats_averaging_separate_fits_on_noisy_data():
+    """联合拟合的意义在于精度，不只是形式好看——噪声大时优势才看得出来。
+
+    各组单独拟合再平均，等于扔掉了「斜率必须相同」这条硬约束。
+    """
+    joint_errors, mean_errors = [], []
+    for seed in range(12):
+        result = joint_fit(_two_condition_datasets(noise=1.5, seed=seed), _linear,
+                           ["a"], ["b"], [1.0], [[0.0], [0.0]])
+        comparison = result["comparison"]["a"]
+        joint_errors.append(abs(comparison["joint"] - 2.5))
+        mean_errors.append(abs(comparison["separate_mean"] - 2.5))
+    assert np.mean(joint_errors) <= np.mean(mean_errors) * 1.05
+
+
+def test_joint_fit_rejects_mismatched_initial_guess_shape():
+    with pytest.raises(ValueError):
+        joint_fit(_two_condition_datasets(), _linear, ["a"], ["b"], [1.0], [[0.0]])
+
+
+def test_subrange_drift_scan_detects_a_monotone_drift():
+    x = np.linspace(1.0, 10.0, 400)
+    # 估计量随所用区间线性平移——典型的「模型里少建了一项」的表现
+    result = subrange_drift_scan(x, np.zeros_like(x),
+                                 lambda xs, ys: float(xs.mean() * 0.1 + 1.0),
+                                 [(1, 4), (4, 7), (7, 10)])
+    assert result["monotonic"] is True
+    assert result["drift_relative"] > 0.3
+    assert result["values"][0] < result["values"][-1]
+
+
+def test_subrange_drift_scan_stays_flat_when_there_is_no_systematic_effect():
+    rng = np.random.default_rng(3)
+    x = np.linspace(0.0, 10.0, 600)
+    y = 4.0 + rng.normal(0, 0.01, x.size)
+    result = subrange_drift_scan(x, y, lambda xs, ys: float(ys.mean()),
+                                 [(0, 3), (3, 6), (6, 10)])
+    assert result["drift_relative"] < 0.01
+    assert result["full_range_value"] == pytest.approx(4.0, abs=0.01)
+
+
+def test_subrange_drift_scan_refuses_an_empty_window():
+    x = np.linspace(0.0, 10.0, 50)
+    with pytest.raises(ValueError):
+        subrange_drift_scan(x, x, lambda xs, ys: float(ys.mean()), [(100, 200)])

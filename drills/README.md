@@ -16,6 +16,17 @@ Task 23 做的是"工具链跑不跑得通"的技术验证。这份指南是给�
 
 演练冻结结果前禁止读取 `corpus/`、`建模/` 中的同题论文。需要和优秀论文比较时，先保存盲测结果、代码和审计报告，再把 `case.json` 的 `phase` 改为 `postmortem`。
 
+## 已有的一次完整演练
+
+[`2025-A-smoke-screen/`](2025-A-smoke-screen/) 是照上面流程走完的 2025 A 题（烟幕干扰弹投放策略），五问全解、可复现：
+
+```bash
+.venv/bin/python drills/2025-A-smoke-screen/solve.py     # 约一分钟，固定种子 2025
+.venv/bin/python drills/2025-A-smoke-screen/make_artifacts.py
+```
+
+拿它当参照时注意三点：**一，** 它是盲测演练不是获奖范本，问题五用分层配对加边际追加，目录 README 里已声明只是可复现的启发式可行解、不声称全局最优；**二，** 它演示的是「官方输入 → 模型 → results.json → 论文和官方 xlsx」这条链怎么接，值得抄的是这个组织方式；**三，** 它没有建 `case.json`，所以 `case_audit.py` 的那套模型卡证据链在它身上没跑过——你自己的演练要补上这一步。
+
 ## 演练之后
 
 把发现的问题整理成一份 `drills/<日期>-real-drill.md`（格式参考 `2026-integration-drill.md`），然后回去修 `analysis/`、`templates/`、`snippets/`、`checklist/` 里对应的地方——这是"设计原则"里说的持续迭代，不是演练完就结束了。

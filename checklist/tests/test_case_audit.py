@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from case_audit import audit_case
+from case_audit import SCOPE_NOTE, audit_case, format_text
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "templates"))
 from init_contest_case import initialize_case
@@ -124,6 +124,47 @@ def test_complete_optimization_case_has_no_warnings(tmp_path):
     report = audit_case(_complete_optimization_case(tmp_path))
     assert report["warnings"] == []
     assert report["metrics"]["questions"] == 1
+    assert report["metrics"]["skipped_questions"] == 0
+
+
+def test_placeholder_values_still_count_as_unfilled(tmp_path):
+    """骨架里的 <...> 占位符必须被判为未填写，不能伪装成已完成。"""
+    case_dir = tmp_path / "placeholder"
+    initialize_case(case_dir, "placeholder", 1)
+    manifest_path = case_dir / "case.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    question = manifest["questions"][0]
+    assert question["target_quantity"].startswith("<")
+
+    # 只把任务类型填掉，其余保持出厂占位符，逐问检查才会真正跑起来。
+    question["task_type"] = "optimization"
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False), encoding="utf-8")
+
+    codes = {item["code"] for item in audit_case(case_dir)["warnings"]}
+    assert "question.target" in codes            # target_quantity 是占位符
+    assert "interpretation.selected" in codes    # selected_metric 是占位符
+    assert "solver.primary" in codes             # primary.method 是占位符
+    assert "trace.equation" in codes             # equation_code_map 样例条目未填
+    assert "paper.section" in codes              # 论文节标题是占位符
+
+
+def test_unclassified_questions_are_counted_as_skipped(tmp_path):
+    """未分类的问题会跳过后续全部检查，报告必须把跳过数说出来。"""
+    case_dir = tmp_path / "skipped"
+    initialize_case(case_dir, "skipped", 3)
+    report = audit_case(case_dir)
+    assert report["metrics"]["skipped_questions"] == 3
+    assert "3 个问题因任务类型未分类" in format_text(report)
+
+
+def test_report_states_that_the_audit_is_structural_only(tmp_path):
+    """审计只查证据在不在，不查证据成不成立——这条边界必须写进输出。"""
+    case_dir = tmp_path / "scope"
+    initialize_case(case_dir, "scope", 1)
+    report = audit_case(case_dir)
+    assert report["scope"] == "structural"
+    assert SCOPE_NOTE in format_text(report)
+    assert "manual_verification.md" in SCOPE_NOTE
 
 
 def test_blind_case_flags_corpus_reference(tmp_path):

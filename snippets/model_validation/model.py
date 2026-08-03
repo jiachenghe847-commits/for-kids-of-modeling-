@@ -15,11 +15,10 @@ def _jsonable(value):
 
 
 def multi_seed_summary(run, seeds, objective_key: str = "objective", sense: str = "min") -> dict:
-    """Repeat a stochastic solver and summarize objective stability.
+    """多种子重复运行随机算法，汇总目标值的稳定性。
 
-    ``run(seed)`` must return a mapping containing ``objective_key``.  The raw
-    run records are retained so they can be serialized into the experiment
-    artifact instead of reporting only the best run.
+    `run(seed)` 必须返回含 `objective_key` 的字典。每次运行的原始记录都保留在
+    `runs` 里，供直接序列化进实验 JSON——正文不能只报告最好的那一次。
     """
     if sense not in {"min", "max"}:
         raise ValueError("sense must be 'min' or 'max'")
@@ -53,10 +52,10 @@ def multi_seed_summary(run, seeds, objective_key: str = "objective", sense: str 
 
 
 def compare_objectives(candidate: float, reference: float, sense: str = "min") -> dict:
-    """Compare a candidate with an independent reference objective.
+    """把主算法结果与独立参考算法的目标值作比较。
 
-    ``degradation`` is positive when the candidate is worse, negative when it
-    is better.  This convention works for both minimization and maximization.
+    `degradation` 为正表示候选方案更差、为负表示更好；最大化和最小化共用这一套
+    符号约定，正文引用时不用再判方向。
     """
     if sense not in {"min", "max"}:
         raise ValueError("sense must be 'min' or 'max'")
@@ -75,10 +74,10 @@ def compare_objectives(candidate: float, reference: float, sense: str = "min") -
 
 
 def constraint_residual_report(constraints: list[dict], default_tolerance: float = 1e-8) -> dict:
-    """Audit scalar equality and inequality constraints.
+    """逐条审计标量等式/不等式约束，给出残差和违反量。
 
-    Each constraint is a mapping with ``name``, ``lhs``, ``relation`` (``<=``,
-    ``>=`` or ``==``), ``rhs``, and an optional per-row ``tolerance``.
+    每条约束是一个字典：`name`、`lhs`、`relation`（`<=`、`>=` 或 `==`）、`rhs`，
+    可选 `tolerance` 覆盖该行的容差。
     """
     rows = []
     for index, item in enumerate(constraints, start=1):

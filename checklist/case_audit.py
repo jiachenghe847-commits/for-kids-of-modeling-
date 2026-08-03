@@ -1,8 +1,13 @@
-"""Audit modeling evidence for a CUMCM case workspace.
+"""审计一个国赛工作目录的建模证据链。
 
-Warnings are advisory by default: the command exits successfully so a team can
-still produce a time-boxed draft.  ``--strict`` turns the same warnings into a
-non-zero exit status for an explicit quality gate.
+**能力边界**：本工具做的是结构检查——字段填没填、登记的文件在不在。它不打开
+证据文件、不读内容、不判断结论是否成立。`ambiguities_reviewed` 写 `true` 就算
+审过了；`validations` 里登记一条独立验证，只要那个文件存在（哪怕内容是 `{}`）
+就算数。因此「0 个警告」只说明证据可定位，不代表证据成立，内容真伪必须走
+`checklist/manual_verification.md`。
+
+警告默认只提示不阻断：命令正常退出，队伍仍可在时间盒内产出草稿。加 `--strict`
+才把同一批警告变成非零退出码，作为显式质量门槛。
 """
 
 from __future__ import annotations
@@ -13,6 +18,12 @@ import re
 from pathlib import Path
 from typing import Any
 
+
+SCOPE = "structural"
+SCOPE_NOTE = (
+    "本工具只检查证据是否存在且可定位，不判断证据是否成立；"
+    "内容真伪见 checklist/manual_verification.md"
+)
 
 TASK_TYPES = {"direct", "mechanism", "simulation", "optimization", "prediction", "evaluation"}
 INDEPENDENT_VALIDATIONS = {
@@ -110,12 +121,17 @@ def _require_validation(
         _warning(warnings, code, f"缺少{label}；可用类型：{', '.join(sorted(accepted))}", question)
 
 
-def _audit_question(case_dir: Path, question: dict, warnings: list[dict]) -> None:
+def _audit_question(case_dir: Path, question: dict, warnings: list[dict]) -> bool:
+    """审计一问，返回 True 表示因任务类型未分类而跳过了后续全部检查。
+
+    未分类时无法确定该用哪套验证判据，只能早返回；但跳过这件事必须在报告里
+    说出来，否则「只有 2 个警告」会被误读成快做完了。
+    """
     qid = str(question.get("id") or "未编号问题")
     task_type = question.get("task_type")
     if task_type not in TASK_TYPES:
         _warning(warnings, "question.task_type", f"任务类型未分类或无效：{task_type!r}", qid)
-        return
+        return True
 
     if _blank(question.get("target_quantity")):
         _warning(warnings, "question.target", "缺少目标量或待求量的明确数学定义", qid)
@@ -246,6 +262,7 @@ def _audit_question(case_dir: Path, question: dict, warnings: list[dict]) -> Non
     for display in displays:
         value = display.get("artifact") if isinstance(display, dict) else display
         _require_path(case_dir, value, warnings, "paper.evidence_path", "论文证据图表", qid)
+    return False
 
 
 def _paper_metrics(tex_path: Path) -> dict:
@@ -297,11 +314,13 @@ def audit_case(case_dir: str | Path) -> dict:
     questions = manifest.get("questions", [])
     if not questions:
         _warning(warnings, "questions.none", "case.json 中没有子问题")
+    skipped = 0
     for question in questions:
         if not isinstance(question, dict):
             _warning(warnings, "question.record", "子问题记录必须是对象")
             continue
-        _audit_question(case_dir, question, warnings)
+        if _audit_question(case_dir, question, warnings):
+            skipped += 1
 
     results_path = manifest.get("results_path")
     _require_path(case_dir, results_path, warnings, "results.path", "统一结果文件")
@@ -310,7 +329,7 @@ def audit_case(case_dir: str | Path) -> dict:
     if paper.get("generated_from") != results_path:
         _warning(warnings, "paper.trace", "论文生成器的数据源必须与 results_path 一致")
 
-    metrics = {"questions": len(questions)}
+    metrics = {"questions": len(questions), "skipped_questions": skipped}
     tex_value = paper.get("tex_path")
     if _path_exists(case_dir, tex_value):
         tex_path = Path(tex_value)
@@ -327,6 +346,7 @@ def audit_case(case_dir: str | Path) -> dict:
 
     return {
         "case_id": manifest.get("case_id"),
+        "scope": SCOPE,
         "warning_count": len(warnings),
         "warnings": warnings,
         "metrics": metrics,
@@ -338,13 +358,17 @@ def format_text(report: dict) -> str:
     for item in report["warnings"]:
         prefix = f"[{item['question']}] " if item.get("question") else ""
         lines.append(f"- {item['code']}: {prefix}{item['message']}")
-    metrics = "，".join(f"{key}={value}" for key, value in report["metrics"].items())
-    lines.append(f"指标：{metrics}")
+    metrics = report.get("metrics", {})
+    skipped = metrics.get("skipped_questions", 0)
+    if skipped:
+        lines.append(f"注意：{skipped} 个问题因任务类型未分类，跳过了后续全部检查")
+    lines.append("指标：" + "，".join(f"{key}={value}" for key, value in metrics.items()))
+    lines.append(f"范围：{SCOPE_NOTE}")
     return "\n".join(lines)
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="audit a CUMCM modeling package")
+    parser = argparse.ArgumentParser(description="审计国赛工作目录的建模证据链（结构检查）")
     parser.add_argument("case_dir", type=Path)
     parser.add_argument("--format", choices=("text", "json"), default="text")
     parser.add_argument("--strict", action="store_true")

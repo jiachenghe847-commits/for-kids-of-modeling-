@@ -1,0 +1,310 @@
+{
+  "attachment_1": {
+    "parameter_bounds": [
+      {
+        "name": "d_um",
+        "value": 7.449265014331917,
+        "lower": 3.0,
+        "upper": 15.0,
+        "slack_to_lower_rel": 0.3707720845276597,
+        "slack_to_upper_rel": 0.6292279154723402,
+        "active": false
+      },
+      {
+        "name": "eps_inf",
+        "value": 6.480549122433306,
+        "lower": 4.0,
+        "upper": 9.0,
+        "slack_to_lower_rel": 0.4961098244866612,
+        "slack_to_upper_rel": 0.5038901755133388,
+        "active": false
+      },
+      {
+        "name": "v_to",
+        "value": 797.942193264288,
+        "lower": 780.0,
+        "upper": 815.0,
+        "slack_to_lower_rel": 0.5126340932653712,
+        "slack_to_upper_rel": 0.48736590673462876,
+        "active": false
+      },
+      {
+        "name": "v_lo",
+        "value": 970.9302811216065,
+        "lower": 950.0,
+        "upper": 990.0,
+        "slack_to_lower_rel": 0.5232570280401632,
+        "slack_to_upper_rel": 0.47674297195983684,
+        "active": false
+      },
+      {
+        "name": "gamma",
+        "value": 3.9314626220622615,
+        "lower": 0.5,
+        "upper": 30.0,
+        "slack_to_lower_rel": 0.11632076684956819,
+        "slack_to_upper_rel": 0.8836792331504317,
+        "active": false
+      },
+      {
+        "name": "vp_sub",
+        "value": 394.55164582408315,
+        "lower": 0.0,
+        "upper": 2000.0,
+        "slack_to_lower_rel": 0.19727582291204157,
+        "slack_to_upper_rel": 0.8027241770879584,
+        "active": false
+      },
+      {
+        "name": "gamma_sub",
+        "value": 747.380823063503,
+        "lower": 10.0,
+        "upper": 3000.0,
+        "slack_to_lower_rel": 0.2466156598874592,
+        "slack_to_upper_rel": 0.7533843401125407,
+        "active": false
+      },
+      {
+        "name": "delta_layer",
+        "value": 0.0034290287317284285,
+        "lower": -0.05,
+        "upper": 0.05,
+        "slack_to_lower_rel": 0.5342902873172842,
+        "slack_to_upper_rel": 0.4657097126827157,
+        "active": false
+      },
+      {
+        "name": "scale",
+        "value": 0.9786141923784075,
+        "lower": 0.8,
+        "upper": 1.2,
+        "slack_to_lower_rel": 0.4465354809460188,
+        "slack_to_upper_rel": 0.5534645190539812,
+        "active": false
+      }
+    ],
+    "max_violation": 0.0
+  },
+  "attachment_2": {
+    "parameter_bounds": [
+      {
+        "name": "d_um",
+        "value": 7.5927248568247006,
+        "lower": 3.0,
+        "upper": 15.0,
+        "slack_to_lower_rel": 0.38272707140205836,
+        "slack_to_upper_rel": 0.6172729285979416,
+        "active": false
+      },
+      {
+        "name": "eps_inf",
+        "value": 6.180830490835244,
+        "lower": 4.0,
+        "upper": 9.0,
+        "slack_to_lower_rel": 0.43616609816704877,
+        "slack_to_upper_rel": 0.5638339018329512,
+        "active": false
+      },
+      {
+        "name": "v_to",
+        "value": 798.4560402591253,
+        "lower": 780.0,
+        "upper": 815.0,
+        "slack_to_lower_rel": 0.5273154359750086,
+        "slack_to_upper_rel": 0.47268456402499137,
+        "active": false
+      },
+      {
+        "name": "v_lo",
+        "value": 973.2186759293782,
+        "lower": 950.0,
+        "upper": 990.0,
+        "slack_to_lower_rel": 0.5804668982344537,
+        "slack_to_upper_rel": 0.41953310176554626,
+        "active": false
+      },
+      {
+        "name": "gamma",
+        "value": 7.075952837433435,
+        "lower": 0.5,
+        "upper": 30.0,
+        "slack_to_lower_rel": 0.2229136555062181,
+        "slack_to_upper_rel": 0.7770863444937819,
+        "active": false
+      },
+      {
+        "name": "vp_sub",
+        "value": 406.0313638813039,
+        "lower": 0.0,
+        "upper": 2000.0,
+        "slack_to_lower_rel": 0.20301568194065195,
+        "slack_to_upper_rel": 0.7969843180593481,
+        "active": false
+      },
+      {
+        "name": "gamma_sub",
+        "value": 669.3991368703358,
+        "lower": 10.0,
+        "upper": 3000.0,
+        "slack_to_lower_rel": 0.2205348283847277,
+        "slack_to_upper_rel": 0.7794651716152723,
+        "active": false
+      },
+      {
+        "name": "delta_layer",
+        "value": -0.0021908994628642626,
+        "lower": -0.05,
+        "upper": 0.05,
+        "slack_to_lower_rel": 0.47809100537135735,
+        "slack_to_upper_rel": 0.5219089946286426,
+        "active": false
+      },
+      {
+        "name": "scale",
+        "value": 1.084406123980305,
+        "lower": 0.8,
+        "upper": 1.2,
+        "slack_to_lower_rel": 0.7110153099507622,
+        "slack_to_upper_rel": 0.2889846900492377,
+        "active": false
+      }
+    ],
+    "max_violation": 0.0
+  },
+  "attachment_3": {
+    "parameter_bounds": [
+      {
+        "name": "d_um",
+        "value": 3.4044163602415765,
+        "lower": 1.0,
+        "upper": 8.0,
+        "slack_to_lower_rel": 0.34348805146308237,
+        "slack_to_upper_rel": 0.6565119485369176,
+        "active": false
+      },
+      {
+        "name": "eps_inf",
+        "value": 11.771177723192054,
+        "lower": 9.0,
+        "upper": 14.0,
+        "slack_to_lower_rel": 0.5542355446384107,
+        "slack_to_upper_rel": 0.44576445536158926,
+        "active": false
+      },
+      {
+        "name": "vp_layer",
+        "value": 74.3807648910319,
+        "lower": 0.0,
+        "upper": 400.0,
+        "slack_to_lower_rel": 0.18595191222757976,
+        "slack_to_upper_rel": 0.8140480877724202,
+        "active": false
+      },
+      {
+        "name": "gamma_layer",
+        "value": 1.0000000000000002,
+        "lower": 1.0,
+        "upper": 3000.0,
+        "slack_to_lower_rel": 7.403954815772967e-20,
+        "slack_to_upper_rel": 1.0,
+        "active": true
+      },
+      {
+        "name": "vp_sub",
+        "value": 1080.023848670091,
+        "lower": 50.0,
+        "upper": 3000.0,
+        "slack_to_lower_rel": 0.34916062666782743,
+        "slack_to_upper_rel": 0.6508393733321726,
+        "active": false
+      },
+      {
+        "name": "gamma_sub",
+        "value": 383.4985302845592,
+        "lower": 10.0,
+        "upper": 5000.0,
+        "slack_to_lower_rel": 0.07484940486664513,
+        "slack_to_upper_rel": 0.925150595133355,
+        "active": false
+      },
+      {
+        "name": "scale",
+        "value": 0.9324369720533905,
+        "lower": 0.8,
+        "upper": 1.2,
+        "slack_to_lower_rel": 0.33109243013347617,
+        "slack_to_upper_rel": 0.6689075698665238,
+        "active": false
+      }
+    ],
+    "max_violation": 0.0
+  },
+  "attachment_4": {
+    "parameter_bounds": [
+      {
+        "name": "d_um",
+        "value": 3.4154989791402652,
+        "lower": 1.0,
+        "upper": 8.0,
+        "slack_to_lower_rel": 0.3450712827343236,
+        "slack_to_upper_rel": 0.6549287172656764,
+        "active": false
+      },
+      {
+        "name": "eps_inf",
+        "value": 11.51383525106474,
+        "lower": 9.0,
+        "upper": 14.0,
+        "slack_to_lower_rel": 0.5027670502129482,
+        "slack_to_upper_rel": 0.49723294978705185,
+        "active": false
+      },
+      {
+        "name": "vp_layer",
+        "value": 72.42969131365494,
+        "lower": 0.0,
+        "upper": 400.0,
+        "slack_to_lower_rel": 0.18107422828413736,
+        "slack_to_upper_rel": 0.8189257717158627,
+        "active": false
+      },
+      {
+        "name": "gamma_layer",
+        "value": 1.0000000000000004,
+        "lower": 1.0,
+        "upper": 3000.0,
+        "slack_to_lower_rel": 1.4807909631545935e-19,
+        "slack_to_upper_rel": 1.0,
+        "active": true
+      },
+      {
+        "name": "vp_sub",
+        "value": 1075.9722892156506,
+        "lower": 50.0,
+        "upper": 3000.0,
+        "slack_to_lower_rel": 0.3477872166832714,
+        "slack_to_upper_rel": 0.6522127833167286,
+        "active": false
+      },
+      {
+        "name": "gamma_sub",
+        "value": 376.7649916052557,
+        "lower": 10.0,
+        "upper": 5000.0,
+        "slack_to_lower_rel": 0.07349999831768651,
+        "slack_to_upper_rel": 0.9265000016823134,
+        "active": false
+      },
+      {
+        "name": "scale",
+        "value": 1.0367547473552052,
+        "lower": 0.8,
+        "upper": 1.2,
+        "slack_to_lower_rel": 0.5918868683880131,
+        "slack_to_upper_rel": 0.4081131316119869,
+        "active": false
+      }
+    ],
+    "max_violation": 0.0
+  }
+}

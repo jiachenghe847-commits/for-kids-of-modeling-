@@ -1,0 +1,170 @@
+{
+  "attachment_1": [
+    {
+      "band_cm-1": [
+        1500.0,
+        4000.0
+      ],
+      "optical_path_um": 39.503976542229964,
+      "fringe_period_cm-1": 253.13907295661605,
+      "oscillation_rms": 0.0040043525443062495,
+      "peak_amplitude": 6.115141000579754
+    },
+    {
+      "band_cm-1": [
+        1500.0,
+        2500.0
+      ],
+      "optical_path_um": 41.09421140195598,
+      "fringe_period_cm-1": 243.3432753383856,
+      "oscillation_rms": 0.005513792966082797,
+      "peak_amplitude": 4.268049096914501
+    },
+    {
+      "band_cm-1": [
+        2500.0,
+        3300.0
+      ],
+      "optical_path_um": 38.72809567212949,
+      "fringe_period_cm-1": 258.2104755333079,
+      "oscillation_rms": 0.0026817585971068347,
+      "peak_amplitude": 1.6224605232421652
+    },
+    {
+      "band_cm-1": [
+        3300.0,
+        4000.0
+      ],
+      "optical_path_um": 37.27728127190831,
+      "fringe_period_cm-1": 268.25990680645145,
+      "oscillation_rms": 0.001483217718811972,
+      "peak_amplitude": 0.8723766094299489
+    }
+  ],
+  "attachment_2": [
+    {
+      "band_cm-1": [
+        1500.0,
+        4000.0
+      ],
+      "optical_path_um": 39.21696102258156,
+      "fringe_period_cm-1": 254.99171122009912,
+      "oscillation_rms": 0.0040989015987004645,
+      "peak_amplitude": 6.034391787633194
+    },
+    {
+      "band_cm-1": [
+        1500.0,
+        2500.0
+      ],
+      "optical_path_um": 40.57856493679854,
+      "fringe_period_cm-1": 246.43552613492085,
+      "oscillation_rms": 0.0055852893212875,
+      "peak_amplitude": 4.327134160380919
+    },
+    {
+      "band_cm-1": [
+        2500.0,
+        3300.0
+      ],
+      "optical_path_um": 38.73434333279877,
+      "fringe_period_cm-1": 258.16882744291627,
+      "oscillation_rms": 0.0029275941331838654,
+      "peak_amplitude": 1.6883678628730996
+    },
+    {
+      "band_cm-1": [
+        3300.0,
+        4000.0
+      ],
+      "optical_path_um": 38.599989552732545,
+      "fringe_period_cm-1": 259.0674276307437,
+      "oscillation_rms": 0.0015691354096845152,
+      "peak_amplitude": 0.8301712470985148
+    }
+  ],
+  "attachment_3": [
+    {
+      "band_cm-1": [
+        1500.0,
+        4000.0
+      ],
+      "optical_path_um": 23.44543782190722,
+      "fringe_period_cm-1": 426.5222119527273,
+      "oscillation_rms": 0.026324881888920668,
+      "peak_amplitude": 23.122112125535317
+    },
+    {
+      "band_cm-1": [
+        1500.0,
+        2500.0
+      ],
+      "optical_path_um": 21.109286536168863,
+      "fringe_period_cm-1": 473.72515328104055,
+      "oscillation_rms": 0.03596383733003238,
+      "peak_amplitude": 28.514192897171863
+    },
+    {
+      "band_cm-1": [
+        2500.0,
+        3300.0
+      ],
+      "optical_path_um": 25.390533734658884,
+      "fringe_period_cm-1": 393.847569511691,
+      "oscillation_rms": 0.006351657422567513,
+      "peak_amplitude": 3.6119439505244095
+    },
+    {
+      "band_cm-1": [
+        3300.0,
+        4000.0
+      ],
+      "optical_path_um": 24.187105328093434,
+      "fringe_period_cm-1": 413.4434387394408,
+      "oscillation_rms": 0.002678850623475563,
+      "peak_amplitude": 1.3373371827157137
+    }
+  ],
+  "attachment_4": [
+    {
+      "band_cm-1": [
+        1500.0,
+        4000.0
+      ],
+      "optical_path_um": 23.28372781044056,
+      "fringe_period_cm-1": 429.48449154760954,
+      "oscillation_rms": 0.029068578931106648,
+      "peak_amplitude": 25.865013831438013
+    },
+    {
+      "band_cm-1": [
+        1500.0,
+        2500.0
+      ],
+      "optical_path_um": 20.88171576733067,
+      "fringe_period_cm-1": 478.88785152630726,
+      "oscillation_rms": 0.039181767700553274,
+      "peak_amplitude": 31.718376488095874
+    },
+    {
+      "band_cm-1": [
+        2500.0,
+        3300.0
+      ],
+      "optical_path_um": 24.78669544170915,
+      "fringe_period_cm-1": 403.4422427756452,
+      "oscillation_rms": 0.007614565379056273,
+      "peak_amplitude": 4.199510691200466
+    },
+    {
+      "band_cm-1": [
+        3300.0,
+        4000.0
+      ],
+      "optical_path_um": 24.288426059617915,
+      "fringe_period_cm-1": 411.71873284230884,
+      "oscillation_rms": 0.0027927623684096924,
+      "peak_amplitude": 1.4039630967152703
+    }
+  ]
+}

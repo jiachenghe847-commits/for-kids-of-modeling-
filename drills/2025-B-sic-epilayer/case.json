@@ -1,0 +1,459 @@
+{
+  "schema_version": 1,
+  "_help": "尖括号 <...> 为待填占位符，case_audit.py 一律判为未填写；字段含义与填写顺序见 analysis/modeling-workflow.md，validations 的可用 type 见 checklist/case_audit.py",
+  "case_id": "2025-B",
+  "phase": "postmortem",
+  "inputs": {
+    "mode": "official-only",
+    "sources": [
+      {
+        "path": "official_input/B题.pdf",
+        "kind": "official"
+      },
+      {
+        "path": "official_input/附件1.xlsx",
+        "kind": "official"
+      },
+      {
+        "path": "official_input/附件2.xlsx",
+        "kind": "official"
+      },
+      {
+        "path": "official_input/附件3.xlsx",
+        "kind": "official"
+      },
+      {
+        "path": "official_input/附件4.xlsx",
+        "kind": "official"
+      }
+    ],
+    "external_references": []
+  },
+  "questions": [
+    {
+      "id": "Q1",
+      "task_type": "mechanism",
+      "target_quantity": "外延层几何厚度 d（单位 µm）与干涉极值波数序列之间的解析关系；本问只建立模型，不涉及附件数值",
+      "interpretation": {
+        "ambiguities_reviewed": true,
+        "ambiguities": [
+          "题目「入射角」未说明是空气中的入射角还是层内折射角——按图 1 标注取空气中的入射角 θ0",
+          "题目说折射率与波长有关，但未给色散形式——不外引常数，把色散写成待定的介电函数并由数据本身定出",
+          "半波损失的有无取决于 n1 与 n2 的大小关系，题目未给——不预设，写成待定的界面反射相位并吸收进级次截距",
+          "附件未说明偏振态——按非偏振处理，取 s、p 平均"
+        ],
+        "candidate_metrics": [
+          "相位光程 2d·sqrt(n1²-sin²θ0)：干涉级次方程的斜率",
+          "群光程 d(相位)/dν /(2π)：相邻条纹间隔实际测到的量，有色散时与相位光程不等",
+          "几何厚度 d：题目最终要的量，需先知道折射率才能由光程换算"
+        ],
+        "selected_metric": "几何厚度 d（µm）；中间量为相位光程，两者由拟合出的折射率联系",
+        "rationale": "题目问的是厚度不是光程；把折射率作为待定参数与厚度一起解，避免引入外部常数"
+      },
+      "model": {
+        "decision_variables": [
+          "d：外延层几何厚度（µm）"
+        ],
+        "parameters": [
+          "θ0：空气中的入射角（10° 或 15°，附件说明给定）",
+          "ν：波数（cm^-1，附件第 1 列）",
+          "ε1(ν)：外延层介电函数（复数，待定）",
+          "ε2(ν)：衬底介电函数（复数，待定）",
+          "m：干涉级次（整数或半整数）"
+        ],
+        "objective": "干涉级次方程 2d·sqrt(ε1-sin²θ0)·ν + (φ01-φ12)/2π = m；由极值波数序列反解 d",
+        "constraints": [
+          "斯涅尔定律 sinθ0 = n1·sinθ1，在模型中以 sqrt(ε1-sin²θ0) 的形式内蕴满足",
+          "d > 0",
+          "反射率 0 ≤ R ≤ 1（附件 2 实测最大 102.7%，说明存在标定误差，模型中用标定因子吸收）"
+        ],
+        "assumptions": [
+          "外延层与衬底界面平行于表面，层厚在光斑内均匀（否则条纹对比度会随波数额外衰减）",
+          "光源为非偏振光，反射率取 s、p 两支的算术平均（附件未给出偏振信息）",
+          "测量为相干测量，光源相干长度远大于层内往返光程 2nd（约 40 µm）",
+          "空气折射率取 1",
+          "外延层与衬底为同种母体材料，仅掺杂浓度不同，声子参数共用",
+          "本问按题意只保留一次反射与一次透射，即双光束叠加 r = r01 + t01·t10·r12·e^{iδ}"
+        ],
+        "discretized": false,
+        "equation_code_map": [
+          {
+            "equation": "式(2) 斯涅尔定律与纵向折射率 sqrt(ε-sin²θ0)",
+            "implementation": "src/optics.py",
+            "test": "tests/test_optics.py"
+          },
+          {
+            "equation": "式(3) 界面菲涅耳振幅反射系数 r_s、r_p",
+            "implementation": "src/optics.py",
+            "test": "tests/test_optics.py"
+          },
+          {
+            "equation": "式(5) 层内往返相位 δ = 4πνd·sqrt(ε1-sin²θ0)",
+            "implementation": "src/optics.py",
+            "test": "tests/test_optics.py"
+          },
+          {
+            "equation": "式(6) 双光束反射率 R = |r01 + (1-r01²)r12 e^{iδ}|²",
+            "implementation": "src/optics.py",
+            "test": "tests/test_optics.py"
+          },
+          {
+            "equation": "式(9) 群光程与相位光程之差（色散修正）",
+            "implementation": "src/optics.py",
+            "test": "tests/test_optics.py"
+          }
+        ]
+      },
+      "decomposition": {
+        "used": false,
+        "method": "",
+        "rationale": "",
+        "joint_benchmark": ""
+      },
+      "solvers": {
+        "baseline": {
+          "method": "无色散极限下的手算式 d = 1/(2Δν·sqrt(n²-sin²θ0))",
+          "entrypoint": "src/optics.py",
+          "result_path": "artifacts/results.json"
+        },
+        "primary": {
+          "method": "正演模型解析推导 + 数值实现（纯函数，无迭代）",
+          "entrypoint": "src/optics.py",
+          "result_path": "artifacts/results.json",
+          "iterative": false,
+          "stochastic": false,
+          "seeds": [],
+          "convergence_trace": ""
+        }
+      },
+      "constraint_audit": "",
+      "validations": [
+        {
+          "type": "dimensional_check",
+          "finding": "δ = 4πνd·sqrt(ε-sin²θ) 中 ν[cm^-1]·d[cm] 无量纲；光程量纲为 cm，与傅里叶共轭变量一致",
+          "artifact": "tests/test_optics.py"
+        },
+        {
+          "type": "analytic_case",
+          "finding": "θ→0 时 s、p 两支均退回 ((n-1)/(n+1))²；布儒斯特角处 p 分量严格为零；相位每增 2π 对应一个级次",
+          "artifact": "tests/test_optics.py"
+        },
+        {
+          "type": "independent_implementation",
+          "finding": "sqrt(ε-sin²θ0) 与由斯涅尔定律显式求折射角再算 n·cosθ1 的结果一致到 1e-12",
+          "artifact": "tests/test_optics.py"
+        },
+        {
+          "type": "formulation_sensitivity",
+          "finding": "相位光程与群光程两种口径在色散区显著分开：附件1 的傅里叶光程从 1000–1800 cm^-1 的 53.2 µm 漂到 3300–4000 cm^-1 的 39.5 µm，相差 35%。这证明「相邻条纹间隔的倒数」测到的是群光程而非相位光程，不能直接当作 2nd·cosθ 换算厚度",
+          "artifact": "artifacts/baseline_fourier.json"
+        }
+      ],
+      "paper": {
+        "section": "问题一：单次反射情形下的干涉厚度模型",
+        "evidence_displays": [
+          {
+            "type": "figure",
+            "artifact": "paper/figures/fig_overview.png"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Q2",
+      "task_type": "optimization",
+      "target_quantity": "附件 1、附件 2 对应碳化硅晶圆的外延层几何厚度 d（µm），及其不确定度",
+      "interpretation": {
+        "ambiguities_reviewed": true,
+        "ambiguities": [
+          "题目要求「分析结果的可靠性」但未指定口径——按不确定度预算处理：分别量化多起点散布、波段选择、两角度差异，取最大者作为报告不确定度",
+          "两个角度是同一块片子，可用于互校；但也可能是不同测点，厚度不均匀会表现为角度间差异——不假定哪一种，把差异如实报为不确定度",
+          "剩余射线带（797~971 cm^-1）内层内强吸收、条纹消失，是否纳入分析——纳入全谱拟合（声子参数靠它定），但不纳入条纹周期分析"
+        ],
+        "candidate_metrics": [
+          "只报光程 2nd·cosθ：测得最准（0.1% 量级）但不是题目要的量",
+          "取文献折射率换算厚度：数值好看但引入了盲测阶段不该有的外部常数",
+          "折射率与厚度一起拟合：自洽，代价是厚度精度受绝对反射率标定限制"
+        ],
+        "selected_metric": "折射率与厚度联合拟合得到的几何厚度 d",
+        "rationale": "题目明确要求由附件数据给出厚度；联合拟合是唯一不引入外部常数又能给出厚度的路线"
+      },
+      "model": {
+        "decision_variables": [
+          "d（µm）",
+          "ε∞",
+          "νTO",
+          "νLO",
+          "γ",
+          "衬底 νp",
+          "衬底 γp",
+          "层介电微调 δ1",
+          "标定因子 s"
+        ],
+        "parameters": [
+          "θ0=10°/15°",
+          "附件 1、2 的 7468 组 (ν, R)"
+        ],
+        "objective": "min Σ[R_模型(ν;p) - R_实测(ν)]²，R_模型 取问题一的双光束公式",
+        "constraints": [
+          "参数箱式边界（见 artifacts/constraints.json 的逐参数松弛度）",
+          "νTO < νLO（剩余射线带存在性，由拟合结果 797.9 < 970.9 事后确认）",
+          "标定因子 s ∈ [0.8, 1.2]"
+        ],
+        "assumptions": [
+          "外延层与衬底界面平行于表面，层厚在光斑内均匀（否则条纹对比度会随波数额外衰减）",
+          "光源为非偏振光，反射率取 s、p 两支的算术平均（附件未给出偏振信息）",
+          "测量为相干测量，光源相干长度远大于层内往返光程 2nd（约 40 µm）",
+          "空气折射率取 1",
+          "外延层与衬底为同种母体材料，仅掺杂浓度不同，声子参数共用"
+        ],
+        "discretized": false,
+        "equation_code_map": [
+          {
+            "equation": "式(11) Lorentz 单振子介电函数（剩余射线带）",
+            "implementation": "src/optics.py",
+            "test": "tests/test_optics.py"
+          },
+          {
+            "equation": "式(13) 傅里叶基线法：光程 = rfftfreq 共轭变量",
+            "implementation": "src/inversion.py",
+            "test": "tests/test_inversion.py"
+          },
+          {
+            "equation": "式(14) 条纹级次线性回归 m_k = L·ν_k + c",
+            "implementation": "src/inversion.py",
+            "test": "tests/test_inversion.py"
+          },
+          {
+            "equation": "式(15) 双角度光程比反演折射率及其条件数",
+            "implementation": "src/compute.py",
+            "test": "tests/test_inversion.py"
+          }
+        ]
+      },
+      "decomposition": {
+        "used": false,
+        "method": "",
+        "rationale": "",
+        "joint_benchmark": ""
+      },
+      "solvers": {
+        "baseline": {
+          "method": "傅里叶条纹周期法与条纹级次回归法（两条只用周期、可秒级复算的透明基线）",
+          "entrypoint": "src/inversion.py",
+          "result_path": "artifacts/baseline_fourier.json"
+        },
+        "primary": {
+          "method": "全谱双光束模型的多起点有界最小二乘（scipy least_squares, trf）",
+          "entrypoint": "src/compute.py",
+          "result_path": "artifacts/primary_fit.json",
+          "iterative": true,
+          "stochastic": true,
+          "seeds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "convergence_trace": "artifacts/convergence.json"
+        }
+      },
+      "constraint_audit": "artifacts/constraints.json",
+      "validations": [
+        {
+          "type": "independent_solver",
+          "finding": "两条基线给出的光程与主方法一致：附件1 傅里叶 39.504 µm、级次法 39.547 µm，相对差 0.11%；附件2 相对差 0.19%",
+          "artifact": "artifacts/baseline_extremum.json"
+        },
+        {
+          "type": "multi_seed_stability",
+          "finding": "5 个固定种子的多起点全部收敛到同一解，厚度散布小于 1e-6 µm",
+          "artifact": "artifacts/multi_seed.json"
+        },
+        {
+          "type": "formulation_sensitivity",
+          "finding": "换三个分析波段重拟合，附件1 厚度散布 0.0067 µm、附件2 为 0.0193 µm，均远小于两角度间 0.141 µm 的差异",
+          "artifact": "artifacts/band_sensitivity.json"
+        },
+        {
+          "type": "bound_comparison",
+          "finding": "双角度光程比反演折射率的相对条件数为 67，实测 q-1=-0.0145 给出 n=1.60，与全谱拟合的 2.54 严重矛盾——据此判定该路线不可用，而非采信其结果",
+          "artifact": "artifacts/two_angle_crosscheck.json"
+        }
+      ],
+      "paper": {
+        "section": "问题二：碳化硅外延层厚度的算法与计算结果",
+        "evidence_displays": [
+          {
+            "type": "figure",
+            "artifact": "paper/figures/fig_fit_attachment_1.png"
+          },
+          {
+            "type": "figure",
+            "artifact": "paper/figures/fig_convergence.png"
+          },
+          {
+            "type": "table",
+            "artifact": "artifacts/two_angle_crosscheck.json"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Q3",
+      "task_type": "optimization",
+      "target_quantity": "多光束干涉的必要条件及其对厚度精度的影响；附件 3、4 硅晶圆外延层厚度（µm）；附件 1、2 消除多光束影响后的厚度",
+      "interpretation": {
+        "ambiguities_reviewed": true,
+        "ambiguities": [
+          "「必要条件」可指物理条件（界面反射率、相干长度、平行度）也可指可检验的数据判据——两者都给：物理条件用于推导，|r01r12| 与模型偏差用于判定",
+          "「是否出现多光束」是二值判断，但多光束强度随波数连续变化——按波段分别判定，不给全谱一个二值结论",
+          "「消除影响」可理解为改用多光束模型重算，也可理解为剔除受影响波段——采用前者，后者作为波段敏感性的一部分报告"
+        ],
+        "candidate_metrics": [
+          "傅里叶谱二次谐波相对幅度：直观但窄波段内条纹数不足时泄漏本底可达 0.09，分辨力有限",
+          "|r01·r12|：Airy 级数公比，物理清晰但需要先知道介电函数",
+          "忽略多光束造成的模型反射率偏差与该波段测量噪声之比：无人为阈值，作为主判据"
+        ],
+        "selected_metric": "模型偏差/噪声比 > 3 判定多光束不可忽略；|r01r12| 与二次谐波作为旁证",
+        "rationale": "主判据直接对应「影响精度」这一提问，且以实测噪声为尺度，不含拍脑袋的阈值"
+      },
+      "model": {
+        "decision_variables": [
+          "d（µm）",
+          "ε∞",
+          "层 νp、γp",
+          "衬底 νp、γp",
+          "标定因子 s"
+        ],
+        "parameters": [
+          "θ0=10°/15°",
+          "附件 3、4 的 7468 组 (ν, R)",
+          "附件 1、2 同上"
+        ],
+        "objective": "min Σ[R_Airy(ν;p) - R_实测(ν)]²，R_Airy = |(r01+r12e^{iδ})/(1+r01r12e^{iδ})|²",
+        "constraints": [
+          "参数箱式边界（见 artifacts/constraints.json）",
+          "|r01·r12| < 1（Airy 级数收敛的必要条件，实测最大 0.129，满足）",
+          "衬底等离子体波数 νp > 0"
+        ],
+        "assumptions": [
+          "外延层与衬底界面平行于表面，层厚在光斑内均匀（否则条纹对比度会随波数额外衰减）",
+          "光源为非偏振光，反射率取 s、p 两支的算术平均（附件未给出偏振信息）",
+          "测量为相干测量，光源相干长度远大于层内往返光程 2nd（约 40 µm）",
+          "空气折射率取 1",
+          "外延层与衬底为同种母体材料，仅掺杂浓度不同，声子参数共用",
+          "多重往返之间保持完全相干，即相干长度大于最高有效级次的光程；由二次谐波可辨认反推该假设成立"
+        ],
+        "discretized": false,
+        "equation_code_map": [
+          {
+            "equation": "式(17) Airy 多光束反射公式（等比级数求和）",
+            "implementation": "src/optics.py",
+            "test": "tests/test_optics.py"
+          },
+          {
+            "equation": "式(19) 多光束必要条件 |r01·r12| 不可忽略",
+            "implementation": "src/optics.py",
+            "test": "tests/test_optics.py"
+          },
+          {
+            "equation": "式(20) Drude 自由载流子介电函数（重掺杂衬底）",
+            "implementation": "src/optics.py",
+            "test": "tests/test_optics.py"
+          },
+          {
+            "equation": "式(21) 二次谐波判据与其泄漏本底",
+            "implementation": "src/inversion.py",
+            "test": "tests/test_inversion.py"
+          }
+        ]
+      },
+      "decomposition": {
+        "used": false,
+        "method": "",
+        "rationale": "",
+        "joint_benchmark": ""
+      },
+      "solvers": {
+        "baseline": {
+          "method": "问题一的双光束模型拟合——它同时是 Q3 的对照组：与多光束模型的差就是多光束效应",
+          "entrypoint": "src/compute.py",
+          "result_path": "artifacts/primary_fit.json"
+        },
+        "primary": {
+          "method": "全谱 Airy 多光束模型的多起点有界最小二乘",
+          "entrypoint": "src/compute.py",
+          "result_path": "artifacts/primary_fit.json",
+          "iterative": true,
+          "stochastic": true,
+          "seeds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "convergence_trace": "artifacts/convergence.json"
+        }
+      },
+      "constraint_audit": "artifacts/constraints.json",
+      "validations": [
+        {
+          "type": "analytic_case",
+          "finding": "|r01r12|→0 时 Airy 公式与双光束公式在 4000 点上最大偏差 <1e-6，两个模型在极限下自洽",
+          "artifact": "tests/test_optics.py"
+        },
+        {
+          "type": "dimensional_check",
+          "finding": "Airy 分母 1+r01r12e^{iδ} 无量纲；|r01r12| 为纯数，作判据时无需归一",
+          "artifact": "tests/test_optics.py"
+        },
+        {
+          "type": "independent_solver",
+          "finding": "硅片两条基线光程 23.355/23.362 µm 与 Airy 拟合的 2nd·cosθ 一致；多光束判据由二次谐波与 |r01r12| 两条互不相同的证据同向支持",
+          "artifact": "artifacts/multibeam_diagnostic.json"
+        },
+        {
+          "type": "multi_seed_stability",
+          "finding": "5 个固定种子多起点收敛到同一解；硅片两角度厚度 3.4044/3.4155 µm，相对差 0.33%",
+          "artifact": "artifacts/multi_seed.json"
+        },
+        {
+          "type": "formulation_sensitivity",
+          "finding": "三条判据在硅片上同向、在碳化硅上分歧：模型偏差/噪声比在硅片 1000–1800 cm^-1 达 966，在碳化硅同波段只有 6.1；二次谐波法因泄漏本底 0.077~0.106 而在碳化硅上无分辨力。故以模型偏差/噪声比为主判据，谐波法仅作旁证",
+          "artifact": "artifacts/multibeam_diagnostic.json"
+        }
+      ],
+      "paper": {
+        "section": "问题三：多光束干涉的必要条件、判定与厚度修正",
+        "evidence_displays": [
+          {
+            "type": "figure",
+            "artifact": "paper/figures/fig_fit_attachment_3.png"
+          },
+          {
+            "type": "figure",
+            "artifact": "paper/figures/fig_fourier.png"
+          },
+          {
+            "type": "figure",
+            "artifact": "paper/figures/fig_dispersion.png"
+          },
+          {
+            "type": "table",
+            "artifact": "artifacts/multibeam_diagnostic.json"
+          }
+        ]
+      }
+    }
+  ],
+  "results_path": "artifacts/results.json",
+  "paper_path": "paper/paper.tex",
+  "paper": {
+    "generator": "paper/gen_paper.py",
+    "generated_from": "artifacts/results.json",
+    "tex_path": "paper/paper.tex"
+  }
+}

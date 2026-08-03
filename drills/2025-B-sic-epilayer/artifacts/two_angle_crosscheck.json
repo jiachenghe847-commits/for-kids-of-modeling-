@@ -1,0 +1,108 @@
+{
+  "q2_silicon_carbide_two_beam": {
+    "wafer": "silicon_carbide",
+    "model": "two_beam",
+    "d_um_theta10": 7.451691757641547,
+    "d_um_theta15": 7.592479035803676,
+    "d_um_mean": 7.522085396722611,
+    "d_um_half_spread": 0.07039363908106422,
+    "d_relative_spread": 0.018716522179270893,
+    "n_inf_theta10": 2.5437334268128184,
+    "n_inf_theta15": 2.4854557695152937,
+    "n_inf_mean": 2.514594598164056,
+    "n_relative_spread": 0.02317576651921315,
+    "scale_theta10": 0.9794908239880263,
+    "scale_theta15": 1.0846534178578249,
+    "scale_absolute_gap": 0.10516259386979854,
+    "shared_param_agreement": {
+      "eps_inf": 0.04634530983478558,
+      "v_to": 0.0006047664564152754,
+      "v_lo": 0.002323654525894251,
+      "gamma": 0.5567585582209604,
+      "vp_sub": 0.03244801226549229,
+      "gamma_sub": 0.10918019745210947,
+      "delta_layer": 5.734624571281788
+    },
+    "uncertainty_budget": {
+      "formal_std_um_theta10": 0.0027741139298821096,
+      "band_spread_um_theta10": 0.0066625623945135715,
+      "band_spread_um_theta15": 0.019332900692091926,
+      "angle_half_spread_um": 0.07039363908106422,
+      "dominant_source": "角度间散布",
+      "reported_uncertainty_um": 0.07039363908106422
+    }
+  },
+  "q3_silicon_airy": {
+    "wafer": "silicon",
+    "model": "airy",
+    "d_um_theta10": 3.4044163602415765,
+    "d_um_theta15": 3.4154989791402652,
+    "d_um_mean": 3.409957669690921,
+    "d_um_half_spread": 0.005541309449344389,
+    "d_relative_spread": 0.0032500752127205463,
+    "n_inf_theta10": 3.4309149979549267,
+    "n_inf_theta15": 3.393204274880123,
+    "n_inf_mean": 3.412059636417525,
+    "n_relative_spread": 0.011052187562113628,
+    "scale_theta10": 0.9324369720533905,
+    "scale_theta15": 1.0367547473552052,
+    "scale_absolute_gap": 0.10431777530181474,
+    "shared_param_agreement": {
+      "eps_inf": 0.022103700127788017,
+      "vp_layer": 0.026579490695904165,
+      "gamma_layer": 2.220446049250312e-16,
+      "vp_sub": 0.0037584106791708075,
+      "gamma_sub": 0.017713696594479963
+    },
+    "uncertainty_budget": {
+      "formal_std_um_theta10": 0.00411763478672116,
+      "band_spread_um_theta10": 0.021491920595857916,
+      "band_spread_um_theta15": 0.028444317130910335,
+      "angle_half_spread_um": 0.005541309449344389,
+      "dominant_source": "波段选择",
+      "reported_uncertainty_um": 0.028444317130910335
+    }
+  },
+  "q3_silicon_carbide_airy": {
+    "wafer": "silicon_carbide",
+    "model": "airy",
+    "d_um_theta10": 7.449265014331917,
+    "d_um_theta15": 7.5927248568247006,
+    "d_um_mean": 7.520994935578308,
+    "d_um_half_spread": 0.07172992124639199,
+    "d_relative_spread": 0.01907458304673795,
+    "n_inf_theta10": 2.545692267818973,
+    "n_inf_theta15": 2.4861276095235425,
+    "n_inf_mean": 2.515909938671258,
+    "n_relative_spread": 0.02367519495824592,
+    "scale_theta10": 0.9786141923784075,
+    "scale_theta15": 1.084406123980305,
+    "scale_absolute_gap": 0.10579193160189737,
+    "shared_param_agreement": {
+      "eps_inf": 0.04734375569688641,
+      "v_to": 0.0006437579095827437,
+      "v_lo": 0.002354135262601292,
+      "gamma": 0.5713403345121376,
+      "vp_sub": 0.028678395414474887,
+      "gamma_sub": 0.11008298874697355,
+      "delta_layer": 9.078096021020965
+    },
+    "uncertainty_budget": {
+      "formal_std_um_theta10": 0.002667384283530921,
+      "band_spread_um_theta10": 0.0066625623945135715,
+      "band_spread_um_theta15": 0.019332900692091926,
+      "angle_half_spread_um": 0.07172992124639199,
+      "dominant_source": "角度间散布",
+      "reported_uncertainty_um": 0.07172992124639199
+    }
+  },
+  "index_inversion_conditioning": {
+    "path_ratio": 0.9927345157432041,
+    "q": 0.985521818747894,
+    "q_minus_one": -0.014478181252105982,
+    "n_squared": 2.5742307293510454,
+    "n": 1.6044409398139419,
+    "relative_condition_number": 67.272105818789,
+    "note": "q-1 是两个相近数之差，条件数达 10² 量级，该路线不可用于定折射率"
+  }
+}

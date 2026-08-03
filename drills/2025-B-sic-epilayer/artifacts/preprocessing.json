@@ -1,0 +1,106 @@
+{
+  "attachment_1": {
+    "path": "/home/hjc/文档/数学建模/for-kids-of-modeling--main/drills/2025-B-sic-epilayer/official_input/附件1.xlsx",
+    "columns": [
+      "波数 (cm-1)",
+      "反射率 (%)"
+    ],
+    "n_rows_raw": 7469,
+    "n_rows_used": 7468,
+    "dropped_rows": [
+      {
+        "index": 0,
+        "wavenumber_cm-1": 399.6747,
+        "reflectance_percent": 0.0
+      }
+    ],
+    "wavenumber_range_cm-1": [
+      400.1569,
+      4000.122
+    ],
+    "step_min_cm-1": 0.48099999999976717,
+    "step_max_cm-1": 0.4830000000001746,
+    "reflectance_max_percent": 95.38499492,
+    "first_valid_reflectance_percent": 31.29322924,
+    "step_variation_relative": 0.004148373550355379,
+    "monotonic": true
+  },
+  "attachment_2": {
+    "path": "/home/hjc/文档/数学建模/for-kids-of-modeling--main/drills/2025-B-sic-epilayer/official_input/附件2.xlsx",
+    "columns": [
+      "波数 (cm-1)",
+      "反射率 (%)"
+    ],
+    "n_rows_raw": 7469,
+    "n_rows_used": 7468,
+    "dropped_rows": [
+      {
+        "index": 0,
+        "wavenumber_cm-1": 399.6747,
+        "reflectance_percent": 0.0
+      }
+    ],
+    "wavenumber_range_cm-1": [
+      400.1569,
+      4000.122
+    ],
+    "step_min_cm-1": 0.48099999999976717,
+    "step_max_cm-1": 0.4830000000001746,
+    "reflectance_max_percent": 102.7393552,
+    "first_valid_reflectance_percent": 36.33668088,
+    "step_variation_relative": 0.004148373550355379,
+    "monotonic": true
+  },
+  "attachment_3": {
+    "path": "/home/hjc/文档/数学建模/for-kids-of-modeling--main/drills/2025-B-sic-epilayer/official_input/附件3.xlsx",
+    "columns": [
+      "波数 (cm-1)",
+      "反射率 (%)"
+    ],
+    "n_rows_raw": 7469,
+    "n_rows_used": 7468,
+    "dropped_rows": [
+      {
+        "index": 0,
+        "wavenumber_cm-1": 399.6747,
+        "reflectance_percent": 0.0
+      }
+    ],
+    "wavenumber_range_cm-1": [
+      400.1569,
+      4000.122
+    ],
+    "step_min_cm-1": 0.48099999999976717,
+    "step_max_cm-1": 0.4830000000001746,
+    "reflectance_max_percent": 79.8019744,
+    "first_valid_reflectance_percent": 79.8019744,
+    "step_variation_relative": 0.004148373550355379,
+    "monotonic": true
+  },
+  "attachment_4": {
+    "path": "/home/hjc/文档/数学建模/for-kids-of-modeling--main/drills/2025-B-sic-epilayer/official_input/附件4.xlsx",
+    "columns": [
+      "波数 (cm-1)",
+      "反射率 (%)"
+    ],
+    "n_rows_raw": 7469,
+    "n_rows_used": 7468,
+    "dropped_rows": [
+      {
+        "index": 0,
+        "wavenumber_cm-1": 399.6747,
+        "reflectance_percent": 0.0
+      }
+    ],
+    "wavenumber_range_cm-1": [
+      400.1569,
+      4000.122
+    ],
+    "step_min_cm-1": 0.48099999999976717,
+    "step_max_cm-1": 0.4830000000001746,
+    "reflectance_max_percent": 91.48944351,
+    "first_valid_reflectance_percent": 91.48944351,
+    "step_variation_relative": 0.004148373550355379,
+    "monotonic": true
+  }
+}

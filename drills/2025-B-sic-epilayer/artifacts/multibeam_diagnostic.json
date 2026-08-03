@@ -1,0 +1,252 @@
+{
+  "table": [
+    {
+      "attachment": "attachment_1",
+      "wafer": "silicon_carbide",
+      "bands": [
+        {
+          "band_cm-1": [
+            1000.0,
+            1800.0
+          ],
+          "finesse_mean": 0.010452402738818868,
+          "model_gap_max_percent": 0.06329687232439346,
+          "noise_percent": 0.010359695526312317,
+          "gap_over_noise": 6.109916277329522,
+          "multibeam": true,
+          "second_over_first": 0.10190996897306898,
+          "harmonic_leakage_floor": 0.07692373832707677,
+          "harmonic_excess": 0.024986230645992202
+        },
+        {
+          "band_cm-1": [
+            1800.0,
+            2600.0
+          ],
+          "finesse_mean": 0.003980467257868592,
+          "model_gap_max_percent": 0.004775983202329193,
+          "noise_percent": 0.01006868850890218,
+          "gap_over_noise": 0.4743401484817542,
+          "multibeam": false,
+          "second_over_first": 0.034004222481731065,
+          "harmonic_leakage_floor": 0.00892206088842697,
+          "harmonic_excess": 0.025082161593304095
+        },
+        {
+          "band_cm-1": [
+            2600.0,
+            4000.0
+          ],
+          "finesse_mean": 0.0019914940487692234,
+          "model_gap_max_percent": 0.00122635082629996,
+          "noise_percent": 0.00973336016744907,
+          "gap_over_noise": 0.12599460054927397,
+          "multibeam": false,
+          "second_over_first": 0.008663455728350176,
+          "harmonic_leakage_floor": 0.0023249540513039925,
+          "harmonic_excess": 0.006338501677046183
+        }
+      ]
+    },
+    {
+      "attachment": "attachment_2",
+      "wafer": "silicon_carbide",
+      "bands": [
+        {
+          "band_cm-1": [
+            1000.0,
+            1800.0
+          ],
+          "finesse_mean": 0.010541158120029523,
+          "model_gap_max_percent": 0.06540132138273258,
+          "noise_percent": 0.009607709128943497,
+          "gap_over_noise": 6.807171252271703,
+          "multibeam": true,
+          "second_over_first": 0.13651915414735644,
+          "harmonic_leakage_floor": 0.08146386903566931,
+          "harmonic_excess": 0.05505528511168713
+        },
+        {
+          "band_cm-1": [
+            1800.0,
+            2600.0
+          ],
+          "finesse_mean": 0.0035898187718207833,
+          "model_gap_max_percent": 0.0048427362898950665,
+          "noise_percent": 0.010084855949117798,
+          "gap_over_noise": 0.480198856020219,
+          "multibeam": false,
+          "second_over_first": 0.07981281502255357,
+          "harmonic_leakage_floor": 0.00937951021970892,
+          "harmonic_excess": 0.07043330480284464
+        },
+        {
+          "band_cm-1": [
+            2600.0,
+            4000.0
+          ],
+          "finesse_mean": 0.0014702532185972856,
+          "model_gap_max_percent": 0.0010090512013644082,
+          "noise_percent": 0.010444310854042967,
+          "gap_over_noise": 0.09661252096626433,
+          "multibeam": false,
+          "second_over_first": 0.0033360069071148015,
+          "harmonic_leakage_floor": 0.002332102024167557,
+          "harmonic_excess": 0.0010039048829472447
+        }
+      ]
+    },
+    {
+      "attachment": "attachment_3",
+      "wafer": "silicon",
+      "bands": [
+        {
+          "band_cm-1": [
+            1000.0,
+            1800.0
+          ],
+          "finesse_mean": 0.12881397229489272,
+          "model_gap_max_percent": 9.909183253343828,
+          "noise_percent": 0.010256707816869957,
+          "gap_over_noise": 966.1173380648974,
+          "multibeam": true,
+          "second_over_first": 0.19434974286900783,
+          "harmonic_leakage_floor": 0.0868866651202734,
+          "harmonic_excess": 0.10746307774873443
+        },
+        {
+          "band_cm-1": [
+            1800.0,
+            2600.0
+          ],
+          "finesse_mean": 0.03853412674452305,
+          "model_gap_max_percent": 0.41166821950862076,
+          "noise_percent": 0.010206610271657484,
+          "gap_over_noise": 40.33349060576687,
+          "multibeam": true,
+          "second_over_first": 0.14716830454472318,
+          "harmonic_leakage_floor": 0.10730777694974664,
+          "harmonic_excess": 0.03986052759497655
+        },
+        {
+          "band_cm-1": [
+            2600.0,
+            4000.0
+          ],
+          "finesse_mean": 0.01616633751019955,
+          "model_gap_max_percent": 0.07357169182755086,
+          "noise_percent": 0.009982557235124383,
+          "gap_over_noise": 7.370024543278679,
+          "multibeam": true,
+          "second_over_first": 0.01862598940198417,
+          "harmonic_leakage_floor": 0.009602854644549382,
+          "harmonic_excess": 0.009023134757434789
+        }
+      ]
+    },
+    {
+      "attachment": "attachment_4",
+      "wafer": "silicon",
+      "bands": [
+        {
+          "band_cm-1": [
+            1000.0,
+            1800.0
+          ],
+          "finesse_mean": 0.12720272718783113,
+          "model_gap_max_percent": 10.644587934825639,
+          "noise_percent": 0.010034217961605477,
+          "gap_over_noise": 1060.8288533850528,
+          "multibeam": true,
+          "second_over_first": 0.19804189355384275,
+          "harmonic_leakage_floor": 0.10597587490265356,
+          "harmonic_excess": 0.09206601865118919
+        },
+        {
+          "band_cm-1": [
+            1800.0,
+            2600.0
+          ],
+          "finesse_mean": 0.03796599112509621,
+          "model_gap_max_percent": 0.4277468168460252,
+          "noise_percent": 0.009900542836673623,
+          "gap_over_noise": 43.20438019434289,
+          "multibeam": true,
+          "second_over_first": 0.16691180565458616,
+          "harmonic_leakage_floor": 0.1202666602260808,
+          "harmonic_excess": 0.046645145428505355
+        },
+        {
+          "band_cm-1": [
+            2600.0,
+            4000.0
+          ],
+          "finesse_mean": 0.015931556312151828,
+          "model_gap_max_percent": 0.08775622062569544,
+          "noise_percent": 0.010505704597688029,
+          "gap_over_noise": 8.353197047345857,
+          "multibeam": true,
+          "second_over_first": 0.01850888441199327,
+          "harmonic_leakage_floor": 0.009102275087659156,
+          "harmonic_excess": 0.009406609324334113
+        }
+      ]
+    }
+  ],
+  "correction": {
+    "silicon_carbide": {
+      "wafer": "silicon_carbide",
+      "per_angle": [
+        {
+          "angle": "theta10",
+          "d_two_beam_um": 7.451691757641547,
+          "d_airy_um": 7.449265014331917,
+          "shift_um": -0.0024267433096305524,
+          "shift_relative": -0.0003257694960458047,
+          "rms_two_beam": 0.004056685751947602,
+          "rms_airy": 0.0038760834999484093,
+          "rms_improvement": 0.044519655463203245
+        },
+        {
+          "angle": "theta15",
+          "d_two_beam_um": 7.592479035803676,
+          "d_airy_um": 7.5927248568247006,
+          "shift_um": 0.0002458210210249945,
+          "shift_relative": 3.2375863166441346e-05,
+          "rms_two_beam": 0.00705521630147854,
+          "rms_airy": 0.007034555197581256,
+          "rms_improvement": 0.0029284862454116434
+        }
+      ],
+      "mean_shift_relative": -0.00014669681643968168,
+      "mean_rms_improvement": 0.023724070854307444
+    },
+    "silicon": {
+      "wafer": "silicon",
+      "per_angle": [
+        {
+          "angle": "theta10",
+          "d_two_beam_um": 3.1401735461496623,
+          "d_airy_um": 3.4044163602415765,
+          "shift_um": 0.2642428140919142,
+          "shift_relative": 0.07761765487261482,
+          "rms_two_beam": 0.049591232870746765,
+          "rms_airy": 0.009380902051279396,
+          "rms_improvement": 0.8108354741708172
+        },
+        {
+          "angle": "theta15",
+          "d_two_beam_um": 3.144096677558957,
+          "d_airy_um": 3.4154989791402652,
+          "shift_um": 0.27140230158130807,
+          "shift_relative": 0.07946197707534502,
+          "rms_two_beam": 0.05578277884337344,
+          "rms_airy": 0.010469784543742639,
+          "rms_improvement": 0.8123115276644851
+        }
+      ],
+      "mean_shift_relative": 0.07853981597397992,
+      "mean_rms_improvement": 0.8115735009176512
+    }
+  }
+}

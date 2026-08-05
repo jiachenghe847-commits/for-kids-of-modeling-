@@ -420,13 +420,15 @@ def _subsection_balance(tex_path: Path | None) -> dict | None:
     """
     if tex_path is None or not tex_path.is_file():
         return None
-    text = re.sub(r"(?<!\\)%.*", "", tex_path.read_text(encoding="utf-8"))
-    marks = list(_SUBSUB.finditer(text))
-    if len(marks) < 2:
-        return None
+    raw = tex_path.read_text(encoding="utf-8")
+    # TODO 槽位本身就是 LaTeX 注释，必须在剥注释之前数。它跟「有没有同名小节可比」
+    # 是两件事：单问论文没有任何可比对象，但 14 个没填的槽位照样得报出来。
+    todo = [{"section": m.group(1).strip(), "element": m.group(2).strip()}
+            for m in _TODO_SLOT.finditer(raw)]
 
+    text = re.sub(r"(?<!\\)%.*", "", raw)
     groups: dict[str, list[int]] = {}
-    for mark in marks:
+    for mark in _SUBSUB.finditer(text):
         following = _ANY_HEADING.search(text, mark.end())
         end = following.start() if following else len(text)
         chars = len(re.findall(r"[㐀-鿿]", text[mark.end():end]))
@@ -442,15 +444,14 @@ def _subsection_balance(tex_path: Path | None) -> dict | None:
             "counts": counts,
             "min": lo,
             "max": hi,
-            "ratio": (hi / lo) if lo else float("inf"),
+            # 最短那节是空的时候「差几倍」没有定义。不要写 float("inf")：
+            # json.dumps 会吐出 Infinity，那不是合法 JSON，严格解析器读不了。
+            "ratio": (hi / lo) if lo else None,
         })
-    if not rows:
+    if not rows and not todo:
         return None
-    rows.sort(key=lambda r: r["ratio"], reverse=True)
-
-    raw = tex_path.read_text(encoding="utf-8")
-    todo = [{"section": m.group(1).strip(), "element": m.group(2).strip()}
-            for m in _TODO_SLOT.finditer(raw)]
+    # ratio 为 None 的排最前——有空节比差几倍更该先看。
+    rows.sort(key=lambda r: (r["ratio"] is None, r["ratio"] or 0.0), reverse=True)
     return {"rows": rows, "todo_slots": len(todo), "todo": todo[:12]}
 
 
@@ -569,10 +570,14 @@ def _subsection_balance_text(report: dict) -> str:
     lines = ["小节展开度（同名小节在各问之间的汉字数，用论文自己作参照，无外部基线）"]
     for row in report["rows"]:
         counts = "/".join(str(c) for c in row["counts"])
-        lines.append(
-            f"  {row['subsection']:<14}{counts:<20}最短 {row['min']}，最长 {row['max']}，"
-            f"相差 {row['ratio']:.1f} 倍"
-        )
+        if row["ratio"] is None:
+            tail = ("这些小节都还是空的" if row["max"] == 0
+                    else f"最长 {row['max']}，但最短那节是空的")
+        else:
+            tail = f"最短 {row['min']}，最长 {row['max']}，相差 {row['ratio']:.1f} 倍"
+        lines.append(f"  {row['subsection']:<14}{counts:<20}{tail}")
+    if not report["rows"]:
+        lines.append("  没有同名小节可比（只有一问，或各小节标题都不重名）")
     if report["todo_slots"]:
         lines.append(f"  骨架 TODO 槽位未填：{report['todo_slots']} 处"
                      f"（如 {report['todo'][0]['section']}/{report['todo'][0]['element']}）")

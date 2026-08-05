@@ -28,6 +28,24 @@ def test_codex_and_claude_entries_share_quality_contract():
         assert marker in claude
 
 
+def test_all_entry_docs_agree_on_which_audit_sections_exist():
+    """三个不计入警告数的分节，四份入口文档必须都列全、数目一致。
+
+    回归：新增「小节展开度」时只改了 README，AGENTS/SKILL/workflow 仍写「两个分节」
+    且没提这一节——照文档写的人不会知道去看它。标记式断言查不出这种数目漂移，
+    所以这里把数目和名字一起钉死。
+    """
+    docs = {
+        name: (ROOT / name).read_text(encoding="utf-8")
+        for name in ("AGENTS.md", ".claude/skills/cumcm-toolkit/SKILL.md",
+                     "README.md", "analysis/modeling-workflow.md")
+    }
+    for name, text in docs.items():
+        for section in ("完备性对标", "证据利用率", "小节展开度"):
+            assert section in text, f"{name} 没提到「{section}」"
+        assert "两个分节" not in text, f"{name} 还写着「两个分节」，分节已经有三个"
+
+
 def test_case_skeleton_and_audit_agree_on_the_placeholder_convention():
     """init_contest_case.py 发占位符、case_audit.py 认占位符，两边不能各改各的。"""
     import sys

@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from case_audit import SCOPE_NOTE, audit_case, format_text
+from case_audit import SCOPE_NOTE, _subsection_balance_text, audit_case, format_text
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "templates"))
 from init_contest_case import initialize_case
@@ -435,6 +435,63 @@ def test_unfilled_skeleton_slots_are_counted(tmp_path):
     balance = audit_case(case_dir)["subsection_balance"]
     assert balance["todo_slots"] == 28          # 两问 × 14 个必需元素
     assert balance["todo"][0]["section"] == "模型建立"
+
+
+def test_single_question_paper_still_reports_its_unfilled_slots(tmp_path):
+    """回归：一问的论文没有同名兄弟小节，但 14 个没填的槽位照样得报出来。
+
+    先判断「有没有可比小节」再数 TODO 时，单问骨架会整个返回 None——
+    审计报告里连一行都不出现，等于把最该提醒的场景漏掉了。
+    """
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "templates"))
+    from paper_skeleton import paper_skeleton
+
+    case_dir = _complete_optimization_case(tmp_path)
+    (case_dir / "paper/paper.tex").write_text(
+        paper_skeleton([{"id": "Q1", "title": "问题一", "task_type": "optimization"}]),
+        encoding="utf-8")
+    balance = audit_case(case_dir)["subsection_balance"]
+    assert balance is not None
+    assert balance["rows"] == []                # 没有可比对象，这部分确实是空的
+    assert balance["todo_slots"] == 14
+    assert "14 处" in _subsection_balance_text(balance)
+
+
+def test_empty_subsections_serialise_as_valid_json(tmp_path):
+    """回归：空节的「差几倍」必须是 null，不能是 float('inf')。
+
+    json.dumps 把 inf 写成 Infinity，那是 Python 的扩展、不是合法 JSON，
+    严格解析器（jq、Go、多数前端）直接报错——`--format json` 就没法给别的工具吃。
+    """
+    case_dir = _complete_optimization_case(tmp_path)
+    _paper_with_subsections(case_dir, [
+        ("问题一", {"模型建立": "", "结果分析": "文" * 30}),
+        ("问题二", {"模型建立": "甲" * 40, "结果分析": "文" * 30}),
+    ])
+    balance = audit_case(case_dir)["subsection_balance"]
+    rows = {r["subsection"]: r for r in balance["rows"]}
+    assert rows["模型建立"]["ratio"] is None
+    assert balance["rows"][0]["subsection"] == "模型建立"   # 空节排最前
+
+    def reject(constant):                        # json.loads 默认会放行 Infinity
+        raise AssertionError(f"输出了非法 JSON 常量：{constant}")
+    json.loads(json.dumps(balance, ensure_ascii=False), parse_constant=reject)
+
+    text = _subsection_balance_text(balance)
+    assert "最短那节是空的" in text
+    assert "inf" not in text
+
+
+def test_all_empty_siblings_are_not_reported_as_infinitely_lopsided(tmp_path):
+    """两节都是 0 字不是「相差无穷倍」，是两节都还没写——措辞要说对。"""
+    case_dir = _complete_optimization_case(tmp_path)
+    _paper_with_subsections(case_dir, [
+        ("问题一", {"模型验证": ""}),
+        ("问题二", {"模型验证": ""}),
+    ])
+    balance = audit_case(case_dir)["subsection_balance"]
+    assert balance["rows"][0]["counts"] == [0, 0]
+    assert "都还是空的" in _subsection_balance_text(balance)
 
 
 def test_lopsided_subsections_never_raise_the_warning_count(tmp_path):

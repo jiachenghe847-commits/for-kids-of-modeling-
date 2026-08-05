@@ -289,6 +289,171 @@ def _paper_metrics(tex_path: Path) -> dict:
     }
 
 
+def _iter_manifest_strings(node: Any):
+    """递归吐出 manifest 里所有字符串值，用于反查某个产物有没有被登记过。"""
+    if isinstance(node, str):
+        yield node
+    elif isinstance(node, dict):
+        for value in node.values():
+            yield from _iter_manifest_strings(value)
+    elif isinstance(node, (list, tuple)):
+        for value in node:
+            yield from _iter_manifest_strings(value)
+
+
+def _display_artifacts(manifest: dict) -> set[str]:
+    """收集所有登记为论文图表的产物路径（`paper.evidence_displays`）。"""
+    out = set()
+    for question in manifest.get("questions", []):
+        if not isinstance(question, dict):
+            continue
+        for display in question.get("paper", {}).get("evidence_displays", []):
+            value = display.get("artifact") if isinstance(display, dict) else display
+            if isinstance(value, str) and value.strip():
+                out.add(_file_part(value.strip()))
+    return out
+
+
+def _evidence_utilisation(case_dir: Path, manifest: dict, tex_path: Path | None) -> dict | None:
+    """反过来问一句：算出来的证据，有几份真在论文里露过面。
+
+    现有检查都是「登记的路径存不存在」，方向是从 case.json 出发的；它查不出
+    `artifacts/` 里躺着一堆算完却从没被用过的东西。2025-B 演练实测 10 份证据只露面 4 份——
+    这些不是需要新做的分析，是已经花掉机器时间、只差一张图的结果。
+
+    分三桶：论文已展示 / 已登记但没展示 / 完全没登记。后两桶合起来就是行动清单。
+
+    **刻意不计入警告数**：证据没露面完全可能是有意的——诊断类、过程类的图本就该放支撑材料
+    而不是塞进正文（见 `analysis/figure-guide.md`）。工具不替人做这个决定，
+    只负责让「算了但忘了用」看得见。
+
+    只查文件级，不去猜 `results.json` 内部某个结果块有没有配图——那需要语义判断，
+    静态工具做不了，硬做只会产生假信号。
+    """
+    results_path = manifest.get("results_path")
+    artifacts_dir = None
+    if isinstance(results_path, str) and results_path.strip():
+        candidate = case_dir / _file_part(results_path.strip())
+        if candidate.parent.is_dir():
+            artifacts_dir = candidate.parent
+    if artifacts_dir is None:
+        fallback = case_dir / "artifacts"
+        artifacts_dir = fallback if fallback.is_dir() else None
+    if artifacts_dir is None:
+        return None
+
+    # 聚合结果文件按定义总被引用，列进去只是噪声
+    aggregate = (case_dir / _file_part(results_path.strip())).resolve() \
+        if isinstance(results_path, str) and results_path.strip() else None
+    files = sorted(
+        p for p in artifacts_dir.iterdir()
+        if p.is_file() and (aggregate is None or p.resolve() != aggregate)
+    )
+    if not files:
+        return None
+
+    displays = _display_artifacts(manifest)
+    display_names = {Path(d).name for d in displays}
+    registered_text = [_file_part(s) for s in _iter_manifest_strings(manifest)]
+    tex_text = tex_path.read_text(encoding="utf-8") if tex_path and tex_path.is_file() else ""
+    # 插图的文件名单独拎出来：artifacts/convergence.json 生成的图叫 fig_convergence.png，
+    # 这层对应关系没有任何地方结构化记录，只能靠文件名相含来搭桥。
+    included_figures = re.findall(r"\\includegraphics[^{]*\{([^}]*)\}", tex_text)
+
+    items, shown, cited_only, registered_not_shown, unregistered = [], [], [], [], []
+    for path in files:
+        relative = path.relative_to(case_dir).as_posix()
+        in_displays = relative in displays or path.name in display_names
+        as_figure = any(path.stem in fig for fig in included_figures)
+        # 只在正文里被点了个路径名（如「详见 artifacts/constraints.json」）不算有图表。
+        # 这条必须与上面两条分开，否则一份逐个罗列文件的「支撑文件清单」会把所有证据
+        # 都标成已展示，整个检查就废了。
+        cited = bool(tex_text) and path.stem in tex_text and not as_figure
+        is_shown = in_displays or as_figure
+        is_registered = any(path.name in text for text in registered_text)
+
+        how = ("evidence_displays" if in_displays else
+               "配图" if as_figure else
+               "仅正文引用" if cited else "—")
+        items.append({"file": path.name, "shown": is_shown, "cited": cited,
+                      "registered": is_registered, "how": how})
+        if is_shown:
+            shown.append(path.name)
+        elif cited:
+            cited_only.append(path.name)
+        elif is_registered:
+            registered_not_shown.append(path.name)
+        else:
+            unregistered.append(path.name)
+
+    return {
+        "artifacts_dir": artifacts_dir.relative_to(case_dir).as_posix(),
+        "total": len(files),
+        "shown": len(shown),
+        "shown_ratio": len(shown) / len(files),
+        "shown_files": shown,
+        "cited_only": cited_only,
+        "registered_not_shown": registered_not_shown,
+        "unregistered": unregistered,
+        "items": items,
+    }
+
+
+_SUBSUB = re.compile(r"\\subsubsection\*?\{([^}]*)\}")
+# 小节的结束边界：下一个 \subsubsection，或任何上级标题——最后一个小节不加这条约束
+# 就会一路吃到文末，把后面的独立章节都算进自己的字数里。
+_ANY_HEADING = re.compile(r"\\(?:sub)?(?:sub)?section\*?\{|\\appendix\b|\\end\{document\}")
+_TODO_SLOT = re.compile(r"^[ \t]*%[ \t]*TODO\(([^/]+)/([^)]*)\):", re.MULTILINE)
+
+
+def _subsection_balance(tex_path: Path | None) -> dict | None:
+    """同名小节在各问之间的字数是否量级相当。
+
+    这是小节层面唯一站得住的判断，因为**它不需要外部基线**——拿论文自己作参照。
+    小节级的语料基线做不出来：从 corpus/official-2023 的 14 篇提取件自动切章，
+    与 analysis/paper-structure.md 已实测的占比交叉验证只有 2/14 吻合
+    （pdftotext 把公式打散成了像标题的短行）。编一个阈值比不给更糟，所以这里
+    只报事实：最短多少、最长多少、差几倍。
+
+    2025-B 演练上，「算法设计与求解」三问分别是 59 / 346 / 117 字，相差 5.9 倍——
+    翻开最短那个会发现里面写的是推导，不是算法，内容放错了小节。
+    """
+    if tex_path is None or not tex_path.is_file():
+        return None
+    text = re.sub(r"(?<!\\)%.*", "", tex_path.read_text(encoding="utf-8"))
+    marks = list(_SUBSUB.finditer(text))
+    if len(marks) < 2:
+        return None
+
+    groups: dict[str, list[int]] = {}
+    for mark in marks:
+        following = _ANY_HEADING.search(text, mark.end())
+        end = following.start() if following else len(text)
+        chars = len(re.findall(r"[㐀-鿿]", text[mark.end():end]))
+        groups.setdefault(mark.group(1), []).append(chars)
+
+    rows = []
+    for name, counts in groups.items():
+        if len(counts) < 2:      # 只出现一次的小节没有可比对象
+            continue
+        lo, hi = min(counts), max(counts)
+        rows.append({
+            "subsection": name,
+            "counts": counts,
+            "min": lo,
+            "max": hi,
+            "ratio": (hi / lo) if lo else float("inf"),
+        })
+    if not rows:
+        return None
+    rows.sort(key=lambda r: r["ratio"], reverse=True)
+
+    raw = tex_path.read_text(encoding="utf-8")
+    todo = [{"section": m.group(1).strip(), "element": m.group(2).strip()}
+            for m in _TODO_SLOT.finditer(raw)]
+    return {"rows": rows, "todo_slots": len(todo), "todo": todo[:12]}
+
+
 def audit_case(case_dir: str | Path) -> dict:
     case_dir = Path(case_dir).resolve()
     manifest_path = case_dir / "case.json"
@@ -345,6 +510,7 @@ def audit_case(case_dir: str | Path) -> dict:
 
     metrics = {"questions": len(questions), "skipped_questions": skipped}
     completeness = None
+    tex_path = None
     tex_value = paper.get("tex_path")
     if _path_exists(case_dir, tex_value):
         tex_path = Path(tex_value)
@@ -366,8 +532,10 @@ def audit_case(case_dir: str | Path) -> dict:
         "warning_count": len(warnings),
         "warnings": warnings,
         "metrics": metrics,
-        # 见文件头部注释：体量对标独立于警告计数
+        # 见文件头部注释：下面两项都独立于警告计数
         "completeness": completeness,
+        "evidence_use": _evidence_utilisation(case_dir, manifest, tex_path),
+        "subsection_balance": _subsection_balance(tex_path),
     }
 
 
@@ -386,6 +554,48 @@ def format_text(report: dict) -> str:
     if completeness:
         lines.append("")
         lines.append(_completeness_text(completeness))
+    evidence = report.get("evidence_use")
+    if evidence:
+        lines.append("")
+        lines.append(_evidence_use_text(evidence))
+    balance = report.get("subsection_balance")
+    if balance:
+        lines.append("")
+        lines.append(_subsection_balance_text(balance))
+    return "\n".join(lines)
+
+
+def _subsection_balance_text(report: dict) -> str:
+    lines = ["小节展开度（同名小节在各问之间的汉字数，用论文自己作参照，无外部基线）"]
+    for row in report["rows"]:
+        counts = "/".join(str(c) for c in row["counts"])
+        lines.append(
+            f"  {row['subsection']:<14}{counts:<20}最短 {row['min']}，最长 {row['max']}，"
+            f"相差 {row['ratio']:.1f} 倍"
+        )
+    if report["todo_slots"]:
+        lines.append(f"  骨架 TODO 槽位未填：{report['todo_slots']} 处"
+                     f"（如 {report['todo'][0]['section']}/{report['todo'][0]['element']}）")
+    lines.append("  注：不计入警告数。差几倍是事实不是判定——最短的那个往往不是漏写，"
+                 "而是内容放错了小节，展开模式见 analysis/exposition-guide.md")
+    return "\n".join(lines)
+
+
+def _evidence_use_text(report: dict) -> str:
+    total, shown = report["total"], report["shown"]
+    lines = [
+        f"证据利用率：{report['artifacts_dir']}/ 下 {total} 份证据，"
+        f"{shown} 份有图或表（{report['shown_ratio'] * 100:.0f}%）"
+    ]
+    if report["cited_only"]:
+        lines.append("  仅正文引用了路径、没有图表：" + "、".join(report["cited_only"]))
+    if report["registered_not_shown"]:
+        lines.append("  已登记但论文没展示：" + "、".join(report["registered_not_shown"]))
+    if report["unregistered"]:
+        lines.append("  未登记：" + "、".join(report["unregistered"]))
+    if shown < total:
+        lines.append("  以上都是已经算出来、只差一张图或一张表的东西——凑图数先从这里找")
+    lines.append("  注：不计入警告数。诊断类、过程类证据本就该放支撑材料而不塞进正文，工具不替你决定")
     return "\n".join(lines)
 
 

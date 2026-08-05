@@ -3,6 +3,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from case_audit import SCOPE_NOTE, audit_case, format_text
 
@@ -271,6 +273,181 @@ def test_completeness_medians_match_the_measured_corpus_document(tmp_path):
     for key, expected in documented.items():
         got = BENCHMARKS[key]["median"]
         assert abs(got - expected) <= max(0.002, abs(expected) * 0.005), key
+
+
+def test_evidence_utilisation_sorts_every_artifact_into_exactly_one_bucket(tmp_path):
+    """算出来的证据分四桶：有图表 / 仅正文引用 / 已登记未展示 / 完全没登记。
+
+    fixture 里 result_table.csv 登记为 evidence_display，constraints.json 只出现在
+    constraint_audit，另加一个谁都没提的孤儿文件。
+    """
+    case_dir = _complete_optimization_case(tmp_path)
+    _touch(case_dir, "artifacts/orphan.json")
+    evidence = audit_case(case_dir)["evidence_use"]
+
+    assert "result_table.csv" in evidence["shown_files"]      # evidence_displays 登记
+    assert "constraints.json" in evidence["registered_not_shown"]  # 只在 constraint_audit
+    assert "orphan.json" in evidence["unregistered"]          # 谁都没提
+
+    buckets = ("shown_files", "cited_only", "registered_not_shown", "unregistered")
+    classified = [name for key in buckets for name in evidence[key]]
+    assert len(classified) == evidence["total"]               # 不重不漏
+    assert len(set(classified)) == len(classified)
+
+
+def test_evidence_utilisation_excludes_the_aggregate_results_file(tmp_path):
+    """results.json 按定义总被引用，列进清单只是噪声。"""
+    case_dir = _complete_optimization_case(tmp_path)
+    evidence = audit_case(case_dir)["evidence_use"]
+    assert "results.json" not in [item["file"] for item in evidence["items"]]
+
+
+def test_a_figure_derived_from_an_artifact_counts_as_shown(tmp_path):
+    """artifacts/convergence.json 生成的图叫 fig_convergence.png，这层对应关系
+    没有任何地方结构化记录，只能靠文件名相含来搭桥。"""
+    case_dir = _complete_optimization_case(tmp_path)
+    before = audit_case(case_dir)["evidence_use"]
+    assert "convergence.json" in before["registered_not_shown"]
+
+    tex = case_dir / "paper/paper.tex"
+    tex.write_text(tex.read_text(encoding="utf-8")
+                   + "\n\\includegraphics[width=0.9\\textwidth]{fig_convergence.png}\n",
+                   encoding="utf-8")
+    after = audit_case(case_dir)["evidence_use"]
+    assert "convergence.json" in after["shown_files"]
+    assert after["shown"] == before["shown"] + 1
+
+
+def test_a_bare_path_citation_is_not_counted_as_a_figure(tmp_path):
+    """「详见 artifacts/constraints.json」只是引了个路径，不是图表。
+
+    这两者必须分开，否则一份逐个罗列文件的「支撑文件/材料清单」会把所有证据都标成
+    已展示，整个检查就废了——而那份清单恰恰是 2022 年后获奖论文的标配。
+    """
+    case_dir = _complete_optimization_case(tmp_path)
+    tex = case_dir / "paper/paper.tex"
+    tex.write_text(tex.read_text(encoding="utf-8")
+                   + "\n约束残差详见 \\texttt{artifacts/constraints.json}。\n",
+                   encoding="utf-8")
+    evidence = audit_case(case_dir)["evidence_use"]
+    assert "constraints.json" in evidence["cited_only"]
+    assert "constraints.json" not in evidence["shown_files"]
+
+
+def test_a_supporting_file_listing_does_not_inflate_the_shown_count(tmp_path):
+    """回归：整份支撑文件清单把每个产物都点一遍，有图表的份数不应因此变化。"""
+    case_dir = _complete_optimization_case(tmp_path)
+    before = audit_case(case_dir)["evidence_use"]["shown"]
+    listing = "\n".join(
+        f"  \\item \\texttt{{artifacts/{p.name}}}"
+        for p in sorted((case_dir / "artifacts").iterdir())
+    )
+    tex = case_dir / "paper/paper.tex"
+    tex.write_text(tex.read_text(encoding="utf-8")
+                   + f"\n\\section{{支撑文件/材料清单}}\n\\begin{{itemize}}\n{listing}\n\\end{{itemize}}\n",
+                   encoding="utf-8")
+    assert audit_case(case_dir)["evidence_use"]["shown"] == before
+
+
+def test_unused_evidence_never_raises_the_warning_count(tmp_path):
+    """回归断言：证据没露面只在独立分节里说，不污染 warning_count，也不让 --strict 失败。
+
+    证据没露面完全可能是有意的——诊断类图本就该放支撑材料。工具不替人做这个决定。
+    """
+    case_dir = _complete_optimization_case(tmp_path)
+    baseline = audit_case(case_dir)["warning_count"]
+    for name in ("orphan_a.json", "orphan_b.json", "orphan_c.json"):
+        _touch(case_dir, f"artifacts/{name}")
+    report = audit_case(case_dir)
+    assert len(report["evidence_use"]["unregistered"]) >= 3
+    assert report["warning_count"] == baseline == 0
+
+    text = format_text(report)
+    assert "证据利用率" in text
+    assert "orphan_a.json" in text
+
+
+def test_evidence_section_is_absent_when_there_is_no_artifacts_directory(tmp_path):
+    case_dir = tmp_path / "bare"
+    initialize_case(case_dir, "bare", 1)
+    assert audit_case(case_dir)["evidence_use"] is None
+
+
+def _paper_with_subsections(case_dir: Path, blocks: list[tuple[str, dict]], tail: str = "") -> None:
+    """写一份带 \\subsection/\\subsubsection 的论文；blocks 是 [(问题标题, {小节: 正文})]。"""
+    parts = []
+    for title, sections in blocks:
+        parts.append(f"\\subsection{{{title}}}")
+        for name, body in sections.items():
+            parts.append(f"\\subsubsection{{{name}}}\n{body}")
+    (case_dir / "paper/paper.tex").write_text("\n".join(parts) + tail, encoding="utf-8")
+
+
+def test_subsection_balance_reports_the_ratio_between_sibling_sections(tmp_path):
+    case_dir = _complete_optimization_case(tmp_path)
+    _paper_with_subsections(case_dir, [
+        ("问题一：联合优化模型", {"算法设计与求解": "短" * 10, "结果分析": "文" * 50}),
+        ("问题二", {"算法设计与求解": "长" * 60, "结果分析": "文" * 55}),
+    ])
+    rows = {r["subsection"]: r for r in audit_case(case_dir)["subsection_balance"]["rows"]}
+    assert rows["算法设计与求解"]["counts"] == [10, 60]
+    assert rows["算法设计与求解"]["ratio"] == pytest.approx(6.0)
+    # 倍数最大的排最前，方便一眼看到最该管的那个
+    assert audit_case(case_dir)["subsection_balance"]["rows"][0]["subsection"] == "算法设计与求解"
+
+
+def test_last_subsection_does_not_swallow_the_chapters_after_it(tmp_path):
+    """回归：最后一个 \\subsubsection 必须在下一个上级标题处止住。
+
+    不加这条约束时，问题三的「模型验证」会一路吃到文末，把「灵敏度分析」「模型评价」
+    都算进自己的字数——实测把 253 字虚报成 1602 字。
+    """
+    case_dir = _complete_optimization_case(tmp_path)
+    _paper_with_subsections(
+        case_dir,
+        [("问题一", {"模型验证": "验" * 20}), ("问题二", {"模型验证": "验" * 25})],
+        tail="\n\\section{灵敏度分析}\n" + "尾" * 900 + "\n",
+    )
+    counts = audit_case(case_dir)["subsection_balance"]["rows"][0]["counts"]
+    assert counts == [20, 25]
+
+
+def test_subsection_appearing_only_once_has_no_sibling_to_compare(tmp_path):
+    case_dir = _complete_optimization_case(tmp_path)
+    _paper_with_subsections(case_dir, [
+        ("问题一", {"模型建立": "甲" * 30, "独有小节": "乙" * 30}),
+        ("问题二", {"模型建立": "丙" * 40}),
+    ])
+    names = {r["subsection"] for r in audit_case(case_dir)["subsection_balance"]["rows"]}
+    assert "模型建立" in names
+    assert "独有小节" not in names
+
+
+def test_unfilled_skeleton_slots_are_counted(tmp_path):
+    """骨架留下的 TODO 槽位没填完，要报出来。"""
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "templates"))
+    from paper_skeleton import paper_skeleton
+
+    case_dir = _complete_optimization_case(tmp_path)
+    skeleton = paper_skeleton([{"id": "Q1", "title": "问题一", "task_type": "optimization"},
+                               {"id": "Q2", "title": "问题二", "task_type": "optimization"}])
+    (case_dir / "paper/paper.tex").write_text(skeleton, encoding="utf-8")
+    balance = audit_case(case_dir)["subsection_balance"]
+    assert balance["todo_slots"] == 28          # 两问 × 14 个必需元素
+    assert balance["todo"][0]["section"] == "模型建立"
+
+
+def test_lopsided_subsections_never_raise_the_warning_count(tmp_path):
+    """回归：展开度只在独立分节里陈述事实，不污染 warning_count，也不让 --strict 失败。"""
+    case_dir = _complete_optimization_case(tmp_path)
+    _paper_with_subsections(case_dir, [
+        ("问题一：联合优化模型", {"算法设计与求解": "短"}),
+        ("问题二", {"算法设计与求解": "长" * 500}),
+    ])
+    report = audit_case(case_dir)
+    assert report["subsection_balance"]["rows"][0]["ratio"] >= 100
+    assert report["warning_count"] == 0
+    assert "小节展开度" in format_text(report)
 
 
 def test_cli_warns_without_blocking_and_strict_blocks(tmp_path):

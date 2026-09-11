@@ -74,6 +74,13 @@ def _complete_optimization_case(tmp_path: Path) -> Path:
             }
         ],
     }
+    question["objective_policy"] = {
+        "mode": "single",
+        "stages": [],
+        "tolerances": [],
+        "optimality_claim": False,
+        "solver_evidence": "",
+    }
     question["solvers"] = {
         "baseline": {
             "method": "grid search",
@@ -127,6 +134,30 @@ def test_complete_optimization_case_has_no_warnings(tmp_path):
     assert report["warnings"] == []
     assert report["metrics"]["questions"] == 1
     assert report["metrics"]["skipped_questions"] == 0
+
+
+def test_optimization_policy_requires_explicit_lexicographic_stages(tmp_path):
+    case_dir = _complete_optimization_case(tmp_path)
+    manifest_path = case_dir / "case.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["questions"][0]["objective_policy"] = {
+        "mode": "lexicographic", "stages": [], "tolerances": [],
+        "optimality_claim": False, "solver_evidence": "",
+    }
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False), encoding="utf-8")
+    codes = {item["code"] for item in audit_case(case_dir)["warnings"]}
+    assert "objective_policy.stages" in codes
+
+
+def test_ambiguous_policy_requires_scenario_comparison(tmp_path):
+    case_dir = _complete_optimization_case(tmp_path)
+    manifest_path = case_dir / "case.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    question = manifest["questions"][0]
+    question["interpretation"]["ambiguities"] = ["是否允许改变原方案"]
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False), encoding="utf-8")
+    codes = {item["code"] for item in audit_case(case_dir)["warnings"]}
+    assert "interpretation.scenario" in codes
 
 
 def test_placeholder_values_still_count_as_unfilled(tmp_path):

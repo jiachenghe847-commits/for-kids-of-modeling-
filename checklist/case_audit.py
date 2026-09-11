@@ -160,6 +160,15 @@ def _audit_question(case_dir: Path, question: dict, warnings: list[dict]) -> boo
         _warning(warnings, "interpretation.selected", "缺少最终采用的指标口径", qid)
     if _blank(interpretation.get("rationale")):
         _warning(warnings, "interpretation.rationale", "缺少指标口径的选择依据", qid)
+    if interpretation.get("ambiguities") or len(metrics) > 1:
+        _require_path(
+            case_dir,
+            interpretation.get("scenario_comparison"),
+            warnings,
+            "interpretation.scenario",
+            "题意情景对照记录",
+            qid,
+        )
 
     model = question.get("model", {})
     if task_type == "optimization":
@@ -169,6 +178,24 @@ def _audit_question(case_dir: Path, question: dict, warnings: list[dict]) -> boo
             _warning(warnings, "model.objective", "优化问题缺少目标函数", qid)
         if not model.get("constraints"):
             _warning(warnings, "model.constraints", "优化问题缺少约束条件", qid)
+        policy = question.get("objective_policy")
+        if isinstance(policy, dict):
+            mode = policy.get("mode")
+            if _blank(mode) or mode not in {"single", "lexicographic", "weighted"}:
+                _warning(warnings, "objective_policy.mode", "优化目标政策必须明确为 single、lexicographic 或 weighted", qid)
+            if mode in {"lexicographic", "weighted"} and not policy.get("stages"):
+                _warning(warnings, "objective_policy.stages", "多目标政策缺少有序目标阶段及其定义", qid)
+            if mode == "lexicographic" and policy.get("tolerances") and len(policy["tolerances"]) != len(policy.get("stages", [])):
+                _warning(warnings, "objective_policy.tolerances", "字典序目标的 tolerances 必须与 stages 一一对应", qid)
+            if policy.get("optimality_claim"):
+                _require_path(
+                    case_dir,
+                    policy.get("solver_evidence"),
+                    warnings,
+                    "objective_policy.evidence",
+                    "最优性求解证据",
+                    qid,
+                )
     if not model.get("assumptions"):
         _warning(warnings, "model.assumptions", "未记录模型假设或适用边界", qid)
 
@@ -466,8 +493,8 @@ def audit_case(case_dir: str | Path) -> dict:
         raise AuditConfigurationError(f"cannot read {manifest_path}: {exc}") from exc
 
     warnings: list[dict] = []
-    if manifest.get("schema_version") != 1:
-        _warning(warnings, "schema.version", "case.json 的 schema_version 必须为 1")
+    if manifest.get("schema_version") not in (1, 2):
+        _warning(warnings, "schema.version", "case.json 的 schema_version 必须为 1 或 2")
     if _blank(manifest.get("case_id")):
         _warning(warnings, "case.id", "缺少 case_id")
 

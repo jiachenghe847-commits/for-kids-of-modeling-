@@ -54,6 +54,18 @@ python3 -m venv .venv                                    # 首次
 
 依赖：Python 3.11+（numpy/pandas/scipy/scikit-learn/networkx/statsmodels/matplotlib/python-docx/pytest），其中 scikit-learn 供聚类/PCA/分类/神经网络脚手架使用。
 
+## 交付验收
+
+完成案例后运行统一质量门：
+
+```bash
+.venv/bin/python -m checklist.delivery_audit CASE_DIR --profile reference-quality --strict
+```
+
+它会汇总结构、证据、正文绑定、图件、PDF、重复运行记录和独立评审。严格模式返回 `0=pass`、`1=fail`、`2=needs_review`；视觉质量仍必须由独立人员逐页检查并提交 `reviews/review.json`。用 `tools/record_run.py CASE_DIR --repeat 3 -- COMMAND ...` 记录真实重复运行，用 `tools/export_blind_toolkit.py` 导出不含语料、演练和测试的盲测发行包。
+
+复盘补上的通用求解规则：有“先……再……”优先级时使用 `snippets.linear_programming.solve_lexicographic_lp` / `solve_lexicographic_milp`，不要用大权重冒充字典序；限时 MILP 必须保存 `optimality_proven`、可行 incumbent、上下界和 `mip_gap`，未闭合时不能写“最优”；从 Excel/CSV 反读结果时使用 `snippets.model_validation.parse_number` 和 `compare_tabular_records`，避免负号丢失、小数截断和只检查内存结果。完整复盘见 [docs/postmortems/2026-09-10-d-question.md](docs/postmortems/2026-09-10-d-question.md)。
+
 ⚠️ **必须装在虚拟环境里**。Ubuntu 24.04+ 等系统的 Python 受 PEP 668 保护，直接 `pip3 install -r requirements.txt` 会报 `error: externally-managed-environment`。
 
 自己写分析脚本调用脚手架时，`snippets/` 的 import 路径从仓库根目录算起——脚本放根目录直接跑，或在根目录用 `PYTHONPATH=. .venv/bin/python <脚本>`；否则报 `ModuleNotFoundError: No module named 'snippets'`。详见 [AGENTS.md](AGENTS.md#建模代码)。

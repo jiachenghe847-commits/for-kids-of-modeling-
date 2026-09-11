@@ -1,5 +1,7 @@
 import numpy as np
 from sklearn.model_selection import cross_val_score
+import math
+from itertools import zip_longest
 
 
 def _jsonable(value):
@@ -12,6 +14,91 @@ def _jsonable(value):
     if isinstance(value, (list, tuple)):
         return [_jsonable(item) for item in value]
     return value
+
+
+def parse_number(value, name="value") -> float:
+    """Parse a finite number without losing a sign or decimal precision.
+
+    This is intentionally strict for result-table and spreadsheet re-reads:
+    booleans, empty cells, NaN/Inf and strings with trailing units are rejected
+    instead of being silently truncated or coerced to zero.
+    """
+    if isinstance(value, bool) or value is None:
+        raise ValueError(f"{name} must be a finite number")
+    if isinstance(value, str):
+        text = value.strip().replace(",", "")
+        if not text:
+            raise ValueError(f"{name} is empty")
+        try:
+            value = float(text)
+        except ValueError as exc:
+            raise ValueError(f"{name} is not numeric: {value!r}") from exc
+    elif not isinstance(value, (int, float, np.integer, np.floating)):
+        raise ValueError(f"{name} is not numeric: {value!r}")
+    value = float(value)
+    if not math.isfinite(value):
+        raise ValueError(f"{name} must be finite")
+    return value
+
+
+def compare_tabular_records(expected, observed, fields, key_field=None, tolerances=None) -> dict:
+    """Compare a rebuilt result table with an independently read source table.
+
+    ``expected`` and ``observed`` are lists of row dictionaries. Numeric fields
+    are parsed through :func:`parse_number`, so negative signs and decimals are
+    preserved. The returned row-level mismatches are suitable for a JSON audit
+    artifact and for binding a validation claim to the exported table.
+    """
+    expected, observed = list(expected), list(observed)
+    fields = list(fields)
+    if not fields:
+        raise ValueError("fields must not be empty")
+    if key_field is not None:
+        def keyed(rows, label):
+            result = {}
+            for row in rows:
+                if not isinstance(row, dict) or key_field not in row:
+                    raise ValueError(f"{label} row is missing key field {key_field!r}")
+                key = str(row[key_field])
+                if key in result:
+                    raise ValueError(f"duplicate key {key!r} in {label}")
+                result[key] = row
+            return result
+        left, right = keyed(expected, "expected"), keyed(observed, "observed")
+        keys = sorted(set(left) | set(right))
+        pairs = [(key, left.get(key), right.get(key)) for key in keys]
+    else:
+        if len(expected) != len(observed):
+            pairs = [(index, left if index < len(expected) else None,
+                      right if index < len(observed) else None)
+                     for index, (left, right) in enumerate(zip_longest(expected, observed))]
+        else:
+            pairs = [(index, left, right) for index, (left, right) in enumerate(zip(expected, observed))]
+    tolerance_map = ({field: float(tolerances) for field in fields}
+                     if isinstance(tolerances, (int, float)) else
+                     {field: float((tolerances or {}).get(field, 0.0)) for field in fields})
+    if any(tolerance < 0 or not math.isfinite(tolerance) for tolerance in tolerance_map.values()):
+        raise ValueError("tolerances must be finite and non-negative")
+    rows, mismatches, max_error = [], [], 0.0
+    for key, left, right in pairs:
+        row_result = {"key": key, "fields": {}}
+        if left is None or right is None:
+            mismatches.append({"key": key, "reason": "missing_row"})
+            continue
+        for field in fields:
+            a = parse_number(left.get(field), f"expected[{key}].{field}")
+            b = parse_number(right.get(field), f"observed[{key}].{field}")
+            error = abs(a - b)
+            max_error = max(max_error, error)
+            row_result["fields"][field] = {"expected": a, "observed": b, "abs_error": error,
+                                            "matched": error <= tolerance_map[field]}
+            if error > tolerance_map[field]:
+                mismatches.append({"key": key, "field": field, "expected": a,
+                                   "observed": b, "abs_error": error,
+                                   "tolerance": tolerance_map[field]})
+        rows.append(row_result)
+    return {"matched": not mismatches, "max_abs_error": max_error,
+            "tolerances": tolerance_map, "rows": rows, "mismatches": mismatches}
 
 
 def multi_seed_summary(run, seeds, objective_key: str = "objective", sense: str = "min") -> dict:

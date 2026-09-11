@@ -86,10 +86,10 @@ def _build_benchmarks() -> dict[str, dict]:
             "percent": key in _PERCENT_COLUMNS,
             "source": f"官方 2023 n=14 的四分位（analysis/paper-structure.md 附表二）",
         }
-    # 正文绝对字符数不在附表二里（那张表记的是占比），改用「年代差异」一节的结论：
-    # 各年代正文字符数均值稳定在 1.2-1.3 万，20 多年没变。
+    # 跨年代均值不是单篇区间，且 TeX 汉字与 PDF 字母数字口径不同。
+    # 此项只报告观测值；正式比较由 pdf_metrics 同口径完成。
     benchmarks["body_chars"] = {
-        "low": 12000, "high": 13000, "median": 12500,
+        "low": None, "high": None, "median": None,
         "label": _LABELS["body_chars"], "percent": False,
         "source": "analysis/paper-structure.md 年代差异一节：正文字符数均值稳定在 1.2-1.3 万",
     }
@@ -166,6 +166,23 @@ def _expanded_length(fragment: str, base_dir: Path, _seen: set | None = None) ->
     return total
 
 
+def _expand_tex_inputs(fragment: str, base_dir: Path, seen: set[Path] | None = None) -> str:
+    """Inline local TeX inputs before counting body sections, figures, and tables."""
+    seen = set() if seen is None else seen
+    def replace(match: re.Match) -> str:
+        raw = match.group(1).strip()
+        candidates = [base_dir / raw]
+        if not Path(raw).suffix:
+            candidates.append(base_dir / f"{raw}.tex")
+        for path in candidates:
+            resolved = path.resolve()
+            if path.is_file() and resolved not in seen:
+                seen.add(resolved)
+                return _expand_tex_inputs(path.read_text(encoding="utf-8", errors="replace"), path.parent, seen)
+        return match.group(0)
+    return re.sub(r"\\(?:input|include)\s*\{([^}]+)\}", replace, fragment)
+
+
 def _abstract_chars(text: str) -> int:
     match = re.search(r"\\begin\{abstract\}(.*?)\\end\{abstract\}", text, re.DOTALL)
     return _cjk_count(match.group(1)) if match else 0
@@ -195,7 +212,7 @@ def measure(tex_path: str | Path) -> dict:
     否则挂全量代码的附录会被误判成空的（见 ``_expanded_length``）。
     """
     tex_path = Path(tex_path)
-    text = _strip_comments(tex_path.read_text(encoding="utf-8"))
+    text = _strip_comments(_expand_tex_inputs(tex_path.read_text(encoding="utf-8"), tex_path.parent))
     body, appendix = _split_body_appendix(text)
 
     body_chars = _cjk_count(body)
@@ -245,6 +262,12 @@ def completeness_report(tex_path: str | Path) -> dict:
     for key in _ORDER:
         bench = BENCHMARKS[key]
         value = raw[key]
+        if bench["low"] is None:
+            items.append({"key": key, "label": bench["label"], "value": value,
+                          "display": str(value), "median": None, "band": None,
+                          "band_display": "口径不同，需 PDF 对标", "median_display": "—",
+                          "verdict": "仅测量", "source": bench["source"]})
+            continue
         items.append({
             "key": key,
             "label": bench["label"],

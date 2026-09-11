@@ -3,10 +3,12 @@ import pytest
 from sklearn.linear_model import LinearRegression
 from .model import (
     compare_objectives,
+    compare_tabular_records,
     constraint_residual_report,
     cross_validate_score,
     joint_fit,
     multi_seed_summary,
+    parse_number,
     residual_stats,
     sensitivity_analysis,
     subrange_drift_scan,
@@ -158,3 +160,27 @@ def test_subrange_drift_scan_refuses_an_empty_window():
     x = np.linspace(0.0, 10.0, 50)
     with pytest.raises(ValueError):
         subrange_drift_scan(x, x, lambda xs, ys: float(ys.mean()), [(100, 200)])
+
+
+def test_parse_number_preserves_negative_sign_and_decimal():
+    assert parse_number(" -12.50 ") == pytest.approx(-12.5)
+    assert parse_number("1,234.5") == pytest.approx(1234.5)
+    with pytest.raises(ValueError):
+        parse_number("12 units")
+    with pytest.raises(ValueError):
+        parse_number("nan")
+
+
+def test_compare_tabular_records_catches_roundtrip_value_changes():
+    expected = [{"id": "A", "shift": -1.25}, {"id": "B", "shift": 2.0}]
+    observed = [{"id": "B", "shift": "2.000"}, {"id": "A", "shift": "-1.20"}]
+    report = compare_tabular_records(expected, observed, ["shift"], key_field="id", tolerances=0.01)
+    assert report["matched"] is False
+    assert report["mismatches"][0]["key"] == "A"
+
+
+def test_compare_tabular_records_rejects_duplicate_keys():
+    with pytest.raises(ValueError):
+        compare_tabular_records([{"id": "A", "x": 1}],
+                                [{"id": "A", "x": 1}, {"id": "A", "x": 1}],
+                                ["x"], key_field="id")

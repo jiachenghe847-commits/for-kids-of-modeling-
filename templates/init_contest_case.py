@@ -39,6 +39,7 @@ def question_card(index: int) -> dict:
             "candidate_metrics": [],
             "selected_metric": "<最终采用的指标，例：并集遮蔽时长（重叠区间不重复计）>",
             "rationale": "<选择依据：题目文字 / 物理含义 / 任务场景>",
+            "scenario_comparison": "<若存在多种合理口径，记录对照实验路径；单一口径写明无需对照>",
         },
         "model": {
             "decision_variables": [],
@@ -60,6 +61,13 @@ def question_card(index: int) -> dict:
             "method": "<分层 / 任务分配 / 贪心追加 / 滚动优化，未使用则留空>",
             "rationale": "<为什么可以这样分解，代价是什么>",
             "joint_benchmark": "<缩小规模联合优化对照的结果文件路径>",
+        },
+        "objective_policy": {
+            "mode": "<single / lexicographic / weighted>",
+            "stages": [],
+            "tolerances": [],
+            "optimality_claim": False,
+            "solver_evidence": "<optimization 证据 JSON 路径；限时结果不得声明最优>",
         },
         "solvers": {
             "baseline": {
@@ -87,6 +95,8 @@ def question_card(index: int) -> dict:
         ],
         "paper": {
             "section": "<论文中对应的节标题，须与 paper.tex 中的写法完全一致>",
+            "content": {role: {"label": "", "evidence_ids": [], "notes": ""}
+                        for role in ("analysis", "model", "algorithm", "results", "validation", "interpretation")},
             "evidence_displays": [
                 {
                     "type": "<figure 或 table>",
@@ -106,7 +116,7 @@ def build_manifest(case_id: str, questions: int, input_mode: str = "official-onl
     if questions < 1:
         raise ValueError("questions must be at least 1")
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "_help": HELP_NOTE,
         "case_id": case_id,
         "phase": "blind",
@@ -116,8 +126,22 @@ def build_manifest(case_id: str, questions: int, input_mode: str = "official-onl
             "external_references": [],
         },
         "results_path": "artifacts/results.json",
+        "evidence": [],
+        "claims": [],
+        "figures": [],
+        "deliverables": [],
+        "quality": {
+            "profile": "reference-quality",
+            "reviews_path": "reviews/review.json",
+            "benchmark_path": "reviews/benchmark.json",
+            "pdf_boundaries": {},
+            "run_record_path": "artifacts/run-record.json",
+        },
         "paper": {
             "tex_path": "paper/paper.tex",
+            "pdf_path": "paper/paper.pdf",
+            "log_path": "paper/paper.log",
+            "bindings_path": "paper/results-values.tex",
             "generator": "paper/gen_paper.py",
             "generated_from": "artifacts/results.json",
         },
@@ -167,8 +191,10 @@ def initialize_case(target: Path, case_id: str, questions: int, input_mode: str 
     """建目录、写 case.json 和两个生成脚本的桩；已存在 case.json 时拒绝覆盖。"""
     target = Path(target)
     manifest_path = target / "case.json"
-    if manifest_path.exists():
-        raise FileExistsError(f"refusing to overwrite {manifest_path}")
+    for relative in ("case.json", "src/compute.py", "paper/gen_paper.py", "paper/content-plan.md", "reviews/review.json"):
+        if (target / relative).exists():
+            raise FileExistsError(f"refusing to overwrite {target / relative}")
+    manifest = build_manifest(case_id, questions, input_mode)
 
     for relative in (
         "official_input",
@@ -176,15 +202,25 @@ def initialize_case(target: Path, case_id: str, questions: int, input_mode: str 
         "tests",
         "artifacts/runs",
         "paper/figures",
+        "reviews",
     ):
         (target / relative).mkdir(parents=True, exist_ok=True)
 
-    manifest = build_manifest(case_id, questions, input_mode)
     manifest_path.write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     (target / "src" / "compute.py").write_text(COMPUTE_STUB, encoding="utf-8")
     (target / "paper" / "gen_paper.py").write_text(PAPER_STUB, encoding="utf-8")
+    plan = ["# 逐问内容与实验计划", "", "先计划关键结论和验证，再求解与写作。", ""]
+    for q in manifest["questions"]:
+        plan += [f"## {q['id']}", "", "| 内容 | 对应标签 | 证据/推导 | 尚缺实验 |", "|---|---|---|---|"]
+        plan += [f"| {role} | 待填 | 待填 | 待填 |" for role in q["paper"]["content"]]
+        plan.append("")
+    (target / "paper/content-plan.md").write_text("\n".join(plan), encoding="utf-8")
+    (target / "reviews/review.json").write_text(json.dumps({
+        "status": "pending", "reviewer": "", "snapshot": {}, "scores": {},
+        "pages_reviewed": [], "figures_reviewed": [], "findings": [],
+    }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return manifest_path
 
 

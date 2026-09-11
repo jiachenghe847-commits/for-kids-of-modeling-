@@ -1,5 +1,12 @@
 import numpy as np
-from .model import solve_lp, solve_milp, solve_nlp, solve_multi_objective
+from .model import (
+    solve_lexicographic_lp,
+    solve_lexicographic_milp,
+    solve_lp,
+    solve_milp,
+    solve_nlp,
+    solve_multi_objective,
+)
 
 
 def test_solve_lp_known_optimum():
@@ -59,3 +66,43 @@ def test_multi_objective_weight_shifts_solution():
     bounds = [(0, None), (0, None)]
     r = solve_multi_objective([[-1, 0], [0, -1]], [0.9, 0.1], A_ub, b_ub, bounds)
     assert r["x"][0] > r["x"][1]
+
+
+def test_lexicographic_lp_preserves_first_priority():
+    # First maximize x, then maximize y. A weighted compromise can sacrifice x;
+    # the staged solver must keep the first objective at its exact optimum.
+    result = solve_lexicographic_lp(
+        objectives=[[-1, 0], [0, -1]],
+        A_ub=[[1, 1]],
+        b_ub=[4],
+        bounds=[(0, None), (0, None)],
+    )
+    assert result["success"] and result["optimality_proven"]
+    assert np.allclose(result["x"], [4, 0])
+    assert result["objective_values"] == [-4.0, 0.0]
+    assert all(stage["optimality_proven"] for stage in result["stages"])
+
+
+def test_lexicographic_milp_keeps_integer_priority_and_status():
+    result = solve_lexicographic_milp(
+        objectives=[[-1, 0], [0, -1]],
+        A_ub=[[1, 1]],
+        b_ub=[4],
+        bounds=[(0, 4), (0, 4)],
+        integrality=[1, 1],
+    )
+    assert result["success"] and result["optimality_proven"]
+    assert np.allclose(result["x"], [4, 0])
+    assert result["stages"][0]["status"] == 0
+    assert result["stages"][0]["mip_gap"] == 0.0
+
+
+def test_solver_metadata_does_not_call_a_time_limited_run_optimal():
+    result = solve_milp(
+        c=[-1, -1], A_ub=[[1, 1]], b_ub=[4],
+        bounds=[(0, 4), (0, 4)], integrality=[1, 1],
+        options={"time_limit": 0.0},
+    )
+    assert result["success"] is False
+    assert result["optimality_proven"] is False
+    assert result["status"] != 0

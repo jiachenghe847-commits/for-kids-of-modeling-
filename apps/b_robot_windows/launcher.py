@@ -181,6 +181,13 @@ def main():
     mutex = None
     if sys.platform == 'win32':
         kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+        if not args.smoke_test:
+            kernel.GetConsoleWindow.restype = ctypes.c_void_p
+            console = kernel.GetConsoleWindow()
+            if console:
+                user = ctypes.WinDLL('user32', use_last_error=True)
+                user.ShowWindow.argtypes = (ctypes.c_void_p, ctypes.c_int)
+                user.ShowWindow(console, 0)
         kernel.CreateMutexW.argtypes = (ctypes.c_void_p, ctypes.c_bool, ctypes.c_wchar_p)
         kernel.CreateMutexW.restype = ctypes.c_void_p
         kernel.CloseHandle.argtypes = (ctypes.c_void_p,)

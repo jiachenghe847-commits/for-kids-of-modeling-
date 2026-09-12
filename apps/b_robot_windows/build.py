@@ -24,6 +24,7 @@ def main():
             archive.write(ROOT / name, name)
     subprocess.run([sys.executable, '-m', 'PyInstaller', '--noconfirm', '--clean', '--onedir',
         '--console', '--name', 'B-Robot', '--paths', str(ROOT / 'frozen'),
+        '--collect-submodules', 'scipy._external.array_api_compat',
         '--add-data', 'source_snapshot.zip:.', '--add-data', 'build-info.json:.',
         '--distpath', 'dist', '--workpath', 'build', 'launcher.py'], cwd=ROOT, check=True)
     target = ROOT / 'dist' / 'B-Robot'

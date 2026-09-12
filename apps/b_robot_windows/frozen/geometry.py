@@ -70,11 +70,73 @@ def bearing_region(observations,error=1.0):
     return {'status':'bounded','vertices':v.tolist(),'diameter':d,'diameter_pair':pair}
 
 def diameter(poly):
-    p=np.asarray(poly,float)
+    """Diameter of a convex polygon using rotating calipers.
+
+    Degenerate inputs are handled explicitly.  The fallback for a malformed
+    polygon keeps the diagnostic routine total rather than imposing a hidden
+    bounding box.
+    """
+    p=np.asarray(poly,float).reshape(-1,2)
     if not len(p):return None,None
-    distances=np.sum((p[:,None,:]-p[None,:,:])**2,axis=2)
-    i,j=np.unravel_index(np.argmax(distances),distances.shape)
-    return float(np.sqrt(distances[i,j])),[p[i].tolist(),p[j].tolist()]
+    if len(p)==1:return 0.,[p[0].tolist(),p[0].tolist()]
+    if len(p)==2:
+        return float(np.linalg.norm(p[1]-p[0])),[p[0].tolist(),p[1].tolist()]
+    area2=float(np.sum(p[:,0]*np.roll(p[:,1],-1)-p[:,1]*np.roll(p[:,0],-1)))
+    if area2<0:p=p[::-1]
+    best2=-1.;best=None;j=1;n=len(p)
+    def cross_edge(i,k):
+        return abs(cross(p[(i+1)%n]-p[i],p[k]-p[i]))
+    for i in range(n):
+        ni=(i+1)%n
+        while cross_edge(i,(j+1)%n)>cross_edge(i,j)+1e-10:
+            j=(j+1)%n
+        for k in (i,j,ni):
+            d2=float(np.dot(p[i]-p[k],p[i]-p[k]))
+            if d2>best2:
+                best2=d2;best=(p[i],p[k])
+    # A convexity/order error should not silently corrupt a safety result.
+    exact=np.sum((p[:,None,:]-p[None,:,:])**2,axis=2)
+    ei,ej=np.unravel_index(np.argmax(exact),exact.shape)
+    if float(exact[ei,ej])>best2+1e-7:
+        best2=float(exact[ei,ej]);best=(p[ei],p[ej])
+    return float(np.sqrt(max(0.,best2))),[best[0].tolist(),best[1].tolist()]
+
+def polygon_area(poly):
+    """Area of an ordered polygon; zero for a point or line segment."""
+    p=np.asarray(poly,float).reshape(-1,2)
+    if len(p)<3:return 0.
+    return abs(float(np.sum(p[:,0]*np.roll(p[:,1],-1)-p[:,1]*np.roll(p[:,0],-1)))/2)
+
+def fisher_information(poly, first, second, bearing, sigma_deg=1.005):
+    """Sampled bearing Fisher information for a candidate second detector."""
+    p=np.asarray(poly,float).reshape(-1,2);first=np.asarray(first,float);second=np.asarray(second,float)
+    samples=np.vstack([p,(p+np.roll(p,1,axis=0))/2,p.mean(axis=0)])
+    info=np.zeros((2,2));used=0
+    sigma=math.radians(float(sigma_deg))
+    for source in samples:
+        terms=[]
+        for detector in (first,second):
+            delta=source-detector;rho=float(np.linalg.norm(delta))
+            if rho<5.:continue
+            n=np.array([-delta[1],delta[0]])/rho
+            terms.append(np.outer(n,n)/(rho*rho*sigma*sigma))
+        if terms:info+=sum(terms);used+=1
+    if used:info/=used
+    sign,logdet=np.linalg.slogdet(info)
+    return info,float(logdet if sign>0 else -math.inf)
+
+def pareto_front(records, keys=('mean_area_m2','mean_diameter_m','distance_from_first_m')):
+    """Return nondominated candidate records for minimization metrics."""
+    front=[]
+    for i,a in enumerate(records):
+        dominated=False
+        for j,b in enumerate(records):
+            if i==j:continue
+            av=[float(a[k]) for k in keys];bv=[float(b[k]) for k in keys]
+            if all(x<=y+1e-10 for x,y in zip(bv,av)) and any(x<y-1e-10 for x,y in zip(bv,av)):
+                dominated=True;break
+        if not dominated:front.append(a)
+    return front
 
 def enclosing_circle(poly):
     """Exact finite candidates: optimum supported by at most three vertices."""
@@ -107,29 +169,50 @@ def optical_cover(poly,angle,spacing=25.):
     return np.asarray(points)
 
 def second_point(poly,first,bearing):
-    """Reception-safe candidates for omni sources; sampled minimax geometry score.
+    """Choose a reception-safe second detector by information and area.
 
-    Every retained candidate is <=995m from ALL vertices, hence <=1000m from P.
-    Scores are heuristic comparisons, not a global optimum certificate.
+    A coarse deterministic grid is screened by Fisher information, evaluated
+    with exact polygon clipping, then reduced to a Pareto front.  This is a
+    finite active-sensing design, not a continuous global optimum claim.
     """
-    poly=np.asarray(poly);center,radius=enclosing_circle(poly)
-    theta=math.radians(bearing);u=np.array([math.cos(theta),math.sin(theta)]);v=np.array([-u[1],u[0]])
-    candidates=[]
-    for along in [-200,0,200]:
-        for side in [-600,-400,-200,200,400,600]:
-            x=center+along*u+side*v
-            if np.max(np.linalg.norm(poly-x,axis=1))<=995:candidates.append(x)
-    if not candidates:candidates=[center]
-    samples=np.vstack([poly,(poly+np.roll(poly,1,axis=0))/2,center[None,:]])
-    scores=[]
+    poly=np.asarray(poly,float).reshape(-1,2);first=np.asarray(first,float)
+    center,_=enclosing_circle(poly);lo=poly.min(axis=0);hi=poly.max(axis=0)
+    gx=np.arange(math.floor(lo[0]/200)*200,math.ceil(hi[0]/200)*200+1,200)
+    gy=np.arange(math.floor(lo[1]/200)*200,math.ceil(hi[1]/200)*200+1,200)
+    candidates=[center]
+    candidates.extend(np.array([x,y],float) for x in gx for y in gy)
+    candidates.extend([center+np.array([dx,dy]) for dx in (-100,0,100) for dy in (-100,0,100)])
+    unique=[]
     for x in candidates:
-        worst=0.
+        if np.max(np.linalg.norm(poly-x,axis=1))<=995 and not any(np.linalg.norm(x-y)<1e-7 for y in unique):unique.append(x)
+    if not unique:unique=[center]
+    records=[]
+    samples=np.vstack([poly,(poly+np.roll(poly,1,axis=0))/2,center[None,:]])
+    for x in unique:
+        info,logdet=fisher_information(poly,first,x,bearing)
+        areas=[];diameters=[]
         for source in samples:
             delta=source-x
             if np.linalg.norm(delta)<5:continue
             true=math.degrees(math.atan2(delta[1],delta[0]))
-            for error in [-1.005,0,1.005]:
+            for error in (-1.005,0.,1.005):
                 a,b=wedge(x,true+error);cut=clip(poly,a,b)
-                if len(cut):worst=max(worst,diameter(cut)[0])
-        scores.append(worst+0.04*np.linalg.norm(x-np.asarray(first)))
-    return np.asarray(candidates[int(np.argmin(scores))]),{'candidate_count':len(candidates),'score':min(scores),'scope':'sampled geometry; safe reception certified only when candidate max distance <=1000'}
+                if len(cut):areas.append(polygon_area(cut));diameters.append(diameter(cut)[0])
+        records.append({'position':x.tolist(),'distance_from_first_m':float(np.linalg.norm(x-first)),
+            'max_distance_to_outer_polygon_m':float(np.max(np.linalg.norm(poly-x,axis=1))),
+            'mean_area_m2':float(np.mean(areas) if areas else 0.),'max_area_m2':float(max(areas) if areas else 0.),
+            'mean_diameter_m':float(np.mean(diameters) if diameters else 0.),'max_sampled_diameter_m':float(max(diameters) if diameters else 0.),
+            'logdet_fisher':logdet,'fisher_trace':float(np.trace(info)),'source_error_pairs':len(areas)})
+    # Information is an analytic pre-screen; retain the strongest half before
+    # exact area Pareto filtering to keep online calls inexpensive.
+    records=sorted(records,key=lambda r:r['logdet_fisher'],reverse=True)[:max(8,min(32,len(records)))]
+    front=pareto_front(records)
+    min_area=min(r['mean_area_m2'] for r in front)
+    near=[r for r in front if r['mean_area_m2']<=min_area*1.01+1e-9]
+    selected=min(near,key=lambda r:(r['distance_from_first_m'],-r['logdet_fisher']))
+    return np.asarray(selected['position']),{'candidate_count':len(unique),'evaluated_count':len(records),
+        'pareto_count':len(front),'selected_mean_area_m2':selected['mean_area_m2'],
+        'selected_max_area_m2':selected['max_area_m2'],'selected_mean_diameter_m':selected['mean_diameter_m'],
+        'selected_max_diameter_m':selected['max_sampled_diameter_m'],'selected_logdet_fisher':selected['logdet_fisher'],
+        'selected_fisher_trace':selected['fisher_trace'],'pareto':front,
+        'scope':'Fisher-information screening plus sampled polygon-area Pareto design; finite design, not global optimum'}

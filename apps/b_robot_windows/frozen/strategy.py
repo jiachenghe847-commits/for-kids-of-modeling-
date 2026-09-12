@@ -25,11 +25,11 @@ def discovery_grid(directional=False):
     return [np.array(p,float) for p in sorted(points)]
 
 class Strategy:
-    def __init__(self,robot,directional=False,baseline=False,grid='triangle',early_clears=3):
+    def __init__(self,robot,directional=False,baseline=False,grid='triangle',early_clears=3,localize_batch=3):
         self.robot=robot;self.directional=directional;self.baseline=baseline
         self.cleared=set();self.tracks={};self.measures=0;self.clear_attempts=0;self.fallbacks=0
         self.probe_positions={};self.coverage_visits=0
-        self.grid=grid;self.early_clears=early_clears;self.failed_clear_points={}
+        self.grid=grid;self.early_clears=early_clears;self.localize_batch=localize_batch;self.failed_clear_points={}
     def measure(self,point,channel):
         response=self.robot.measure(tuple(point),channel);self.measures+=1
         self.probe_positions.setdefault(channel,[]).append(np.asarray(point).copy())
@@ -86,12 +86,35 @@ class Strategy:
         self.fallbacks+=1
         if self.try_optical(channel):return
         raise RuntimeError('Exhaustive optical covering failed: bounds/protocol require investigation')
+    def _route(self,points):
+        """Nearest-neighbour coverage route followed by deterministic 2-opt."""
+        points=[np.asarray(p,float) for p in points];start=np.zeros(2);left=list(range(len(points)));route=[];current=start
+        while left:
+            i=min(left,key=lambda k:np.linalg.norm(points[k]-current));route.append(i);current=points[i];left.remove(i)
+        def length(order):
+            return float(np.linalg.norm(points[order[0]]-start)+sum(np.linalg.norm(points[b]-points[a]) for a,b in zip(order,order[1:]))) if order else 0.
+        improved=True
+        while improved:
+            improved=False;best=length(route)
+            for i in range(1,len(route)-1):
+                for j in range(i+1,len(route)):
+                    candidate=route[:i]+route[i:j+1][::-1]+route[j+1:];value=length(candidate)
+                    if value<best-1e-7:route,best,improved=candidate,value,True
+            # Restart the scan after each accepted reversal for stable output.
+        return [points[i] for i in route]
+    def _localize_pending(self,limit=None):
+        pending=[c for c in self.tracks if c not in self.cleared];done=0
+        while pending and (limit is None or done<limit):
+            current=np.asarray(self.robot.position)
+            channel=min(pending,key=lambda c:np.linalg.norm(self.tracks[c]['polygon'].mean(axis=0)-current))
+            self.localize(channel);pending.remove(channel);done+=1
     def run(self):
         if self.grid=='compact':points=compact_directional_grid(self.directional)
         elif self.grid=='ring':
             if self.directional:raise ValueError('Omnidirectional ring is not a directional coverage certificate')
             points=omnidirectional_ring()
         else:points=triangular_grid(self.directional) if self.grid=='triangle' else discovery_grid(self.directional)
+        points=self._route(points)
         while points and len(self.cleared)<16:
             current=np.asarray(self.robot.position);i=min(range(len(points)),key=lambda k:np.linalg.norm(points[k]-current))
             point=points.pop(i);self.coverage_visits+=1
@@ -99,13 +122,11 @@ class Strategy:
             if self.robot.channel in channels:
                 channels.remove(self.robot.channel);channels.insert(0,self.robot.channel)
             for channel in channels:self.measure(point,channel)
-            pending=[c for c in self.tracks if c not in self.cleared]
-            while pending:
-                current=np.asarray(self.robot.position)
-                channel=min(pending,key=lambda c:np.linalg.norm(self.tracks[c]['polygon'].mean(axis=0)-current))
-                self.localize(channel);pending.remove(channel)
+            self._localize_pending(self.localize_batch)
+        self._localize_pending(None)
         return {'cleared_count':len(self.cleared),'cleared_channels':sorted(self.cleared),
                 'virtual_time_s':self.robot.virtual_time,'average_time_s':self.robot.virtual_time/len(self.cleared) if self.cleared else None,
                 'measurements':self.measures,'clear_attempts':self.clear_attempts,'fallbacks':self.fallbacks,
                 'coverage_visits':self.coverage_visits,'grid':self.grid,'early_clears':self.early_clears,
+                'localize_batch':self.localize_batch,
                 'completion_basis':'all coverage nodes visited' if not points else 'known upper bound of 16 sources reached'}

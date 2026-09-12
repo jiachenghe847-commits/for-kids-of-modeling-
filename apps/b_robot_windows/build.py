@@ -23,7 +23,7 @@ def main():
         for name in tracked + ['build-info.json']:
             archive.write(ROOT / name, name)
     subprocess.run([sys.executable, '-m', 'PyInstaller', '--noconfirm', '--clean', '--onedir',
-        '--windowed', '--name', 'B-Robot', '--paths', str(ROOT / 'frozen'),
+        '--console', '--name', 'B-Robot', '--paths', str(ROOT / 'frozen'),
         '--add-data', 'source_snapshot.zip:.', '--add-data', 'build-info.json:.',
         '--distpath', 'dist', '--workpath', 'build', 'launcher.py'], cwd=ROOT, check=True)
     target = ROOT / 'dist' / 'B-Robot'

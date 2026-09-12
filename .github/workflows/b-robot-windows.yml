@@ -1,0 +1,51 @@
+name: Build B Robot Windows
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/b-robot-windows]
+    paths:
+      - 'apps/b_robot_windows/**'
+      - '.github/workflows/b-robot-windows.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-2025
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: apps/b_robot_windows
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+          architecture: x64
+          cache: pip
+          cache-dependency-path: apps/b_robot_windows/requirements-build.txt
+      - name: Install packaging dependencies
+        run: python -m pip install -r requirements-build.txt
+      - name: Check desktop lifecycle without network
+        run: python -m unittest test_launcher -v
+      - name: Build directory bundle
+        run: python build.py
+      - name: Open packaged window without connecting
+        shell: pwsh
+        run: |
+          $report = Join-Path $PWD 'smoke-result.json'
+          $proc = Start-Process -FilePath 'dist/B-Robot/B-Robot.exe' -ArgumentList @('--smoke-test', "`"$report`"") -PassThru
+          if (-not $proc.WaitForExit(60000)) { $proc.Kill(); throw 'Window smoke check timed out' }
+          if ($proc.ExitCode -ne 0) { throw "EXE exited with $($proc.ExitCode)" }
+          $result = Get-Content $report -Raw | ConvertFrom-Json
+          if ($result.status -ne 'passed' -or -not $result.frozen) { throw 'Frozen window check failed' }
+          Copy-Item $report 'dist/B-Robot/packaging-check.json'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: B-Robot-Windows-x64
+          path: apps/b_robot_windows/dist/B-Robot/
+          retention-days: 30
+          if-no-files-found: error
+          include-hidden-files: true

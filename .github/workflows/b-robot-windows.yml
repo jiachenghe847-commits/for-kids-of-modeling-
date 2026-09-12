@@ -36,13 +36,14 @@ jobs:
         shell: pwsh
         run: |
           $report = Join-Path $PWD 'smoke-result.json'
-          $proc = Start-Process -FilePath 'dist/B-Robot/B-Robot.exe' -ArgumentList @('--smoke-test', "`"$report`"") -PassThru
+          $proc = Start-Process -FilePath 'dist/B-Robot/B-Robot.exe' -ArgumentList "--smoke-test `"$report`"" -PassThru
           if (-not $proc.WaitForExit(60000)) { $proc.Kill(); throw 'Window smoke check timed out' }
           if ($proc.ExitCode -ne 0) { throw "EXE exited with $($proc.ExitCode)" }
           $result = Get-Content $report -Raw | ConvertFrom-Json
           if ($result.status -ne 'passed' -or -not $result.frozen) { throw 'Frozen window check failed' }
           Copy-Item $report 'dist/B-Robot/packaging-check.json'
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: B-Robot-Windows-x64
           path: apps/b_robot_windows/dist/B-Robot/

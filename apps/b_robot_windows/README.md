@@ -30,7 +30,7 @@
 
 GitHub Actions 工作流为 Build B Robot Windows，在构建分支手动触发，或推送该分支时触发。
 下载成功运行的 B-Robot-Windows-x64 工件并解压。构建仅进行新增启动和打包检查，不访问官方服务。
-构建环境是 Windows、Python 3.14 x64，依赖固定于 requirements-build.txt。
+构建环境是 Windows、Python 3.14.0 x64，依赖固定于 requirements-build.txt。
 源码目录 frozen 保留当前审查包的四个 v4 运行模块，逐字节复制；桌面层只增加运行控制和记录。
 SHA256SUMS.txt 可核对文件，build-info.json 记录提交和版本。本包未做 Windows 代码签名。
 

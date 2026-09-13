@@ -5,6 +5,8 @@ import numpy as np
 from geometry import circle_outer,clip,wedge,restrict_disk,enclosing_circle,second_point,optical_cover
 from search_coverage import triangular_grid,omnidirectional_ring,compact_directional_grid,DirectionalCertificate
 
+BUILD_VERSION='v8-joint-review-1'
+
 def discovery_grid(directional=False):
     """All corners of cells intersecting the target disk.
 
@@ -25,8 +27,8 @@ def discovery_grid(directional=False):
 
 class Strategy:
     route_detour_m=1000.
-    def __init__(self,robot,directional=False,baseline=False,grid='triangle',early_clears=3,localize_batch=3,scheduler='adaptive'):
-        if scheduler not in ('adaptive', 'legacy'):
+    def __init__(self,robot,directional=False,baseline=False,grid='triangle',early_clears=3,localize_batch=3,scheduler='adaptive',joint_config=None):
+        if scheduler not in ('adaptive', 'legacy', 'joint', 'time_probe'):
             raise ValueError('Unknown scheduler')
         if localize_batch < 0 or early_clears < 0:
             raise ValueError('Batch and early clear limits must be nonnegative')
@@ -39,6 +41,11 @@ class Strategy:
         self.costs={'movement_s':0.,'measurement_s':0.,'switching_s':0.,'successful_clear_s':0.,'failed_clear_s':0.}
         self.phase_costs={};self.no_signals=0
         self.pruned_nodes=0;self.replans=0;self.supplemental_measures=0
+        self.joint_config=joint_config or {};self.action_trace=[];self.decision=None
+    def _trace(self,point,channel,action,response):
+        self.action_trace.append(dict(index=len(self.action_trace),point=np.asarray(point).tolist(),
+            channel=channel,action=action,response=dict(response),decision=self.decision or {'reason':self.phase},
+            virtual_time_s=self.robot.virtual_time))
     def _record_cost(self,point,action,channel,success=False):
         movement=float(np.linalg.norm(np.asarray(point)-self.robot.position))/5
         costs={'movement_s':movement}
@@ -51,6 +58,7 @@ class Strategy:
     def measure(self,point,channel):
         costs=self._record_cost(point,'measure',channel)
         response=self.robot.measure(tuple(point),channel);self.measures+=1
+        self._trace(point,channel,'measure',response)
         self._add_cost(costs)
         self.probe_positions.setdefault(channel,[]).append(np.asarray(point).copy())
         kind=response['measure_result']
@@ -71,6 +79,7 @@ class Strategy:
     def clear(self,point,channel):
         costs=self._record_cost(point,'clear',channel)
         response=self.robot.clear(tuple(point),channel);self.clear_attempts+=1
+        self._trace(point,channel,'clear',response)
         if response['clear_result']=='success':
             costs.pop('failed_clear_s');costs['successful_clear_s']=5.
         self._add_cost(costs)
@@ -241,12 +250,19 @@ class Strategy:
 
     def run(self):
         points=self._grid_points()
-        basis=self._run_adaptive(points) if self.scheduler=='adaptive' else self._run_legacy(points)
+        if self.scheduler in ('joint','time_probe'):
+            from joint_strategy import JointScheduler
+            joint=JointScheduler(self)
+            points=joint.points(points)
+            basis=joint.run(points)
+        else:basis=self._run_adaptive(points) if self.scheduler=='adaptive' else self._run_legacy(points)
         return {'cleared_count':len(self.cleared),'cleared_channels':sorted(self.cleared),
                 'virtual_time_s':self.robot.virtual_time,'average_time_s':self.robot.virtual_time/len(self.cleared) if self.cleared else None,
                 'measurements':self.measures,'clear_attempts':self.clear_attempts,'fallbacks':self.fallbacks,
                 'coverage_visits':self.coverage_visits,'grid':self.grid,'early_clears':self.early_clears,
                 'localize_batch':self.localize_batch,'scheduler':self.scheduler,
+                'build_version':BUILD_VERSION,
+                'joint_config':self.joint_config,'action_trace':self.action_trace,
                 'full_survey_reference':{'nodes':len(points),'channels':20,
                     'measurements':len(points)*20,'measurement_and_switching_s':len(points)*119,
                     'scope':'Reference for scanning all 20 channels at every node with the current channel first; not an adaptive lower bound'},

@@ -112,6 +112,7 @@ def run_session(robot_id, case_code, question, stop, emit, root=None,
             except Exception as close_error:
                 result['exit_error'] = f'{type(close_error).__name__}: {close_error}'
     finally:
+        result['action_trace']=getattr(policy,'action_trace',[])
         result.update(wall_seconds=time.perf_counter() - started, unresolved_action=robot.uncertain)
         result.setdefault('exit_confirmed', False)
         write_json(result_path, result)

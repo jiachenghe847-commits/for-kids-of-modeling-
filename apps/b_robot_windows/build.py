@@ -8,6 +8,8 @@ import sys
 import zipfile
 
 ROOT = Path(__file__).resolve().parent
+sys.path.insert(0,str(ROOT/'frozen'))
+from strategy import BUILD_VERSION
 
 
 def main():
@@ -17,7 +19,7 @@ def main():
     tracked = ['launcher.py', 'session.py', 'build.py', 'requirements-build.txt']
     tracked += [p.relative_to(ROOT).as_posix() for p in sorted((ROOT / 'frozen').glob('*.py'))]
     hashes = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in tracked}
-    (ROOT / 'build-info.json').write_text(json.dumps(dict(version='v7-adaptive-1', commit=commit,
+    (ROOT / 'build-info.json').write_text(json.dumps(dict(version=BUILD_VERSION, commit=commit,
         python=sys.version, source_sha256=hashes), indent=2), encoding='utf8')
     with zipfile.ZipFile(ROOT / 'source_snapshot.zip', 'w', zipfile.ZIP_DEFLATED) as archive:
         for name in tracked + ['build-info.json']:

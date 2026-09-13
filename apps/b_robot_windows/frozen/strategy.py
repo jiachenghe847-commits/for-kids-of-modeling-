@@ -5,7 +5,7 @@ import numpy as np
 from geometry import circle_outer,clip,wedge,restrict_disk,enclosing_circle,second_point,optical_cover
 from search_coverage import triangular_grid,omnidirectional_ring,compact_directional_grid,DirectionalCertificate
 
-BUILD_VERSION='v8-joint-review-1'
+BUILD_VERSION='v9-rollout-review-1'
 
 def discovery_grid(directional=False):
     """All corners of cells intersecting the target disk.
@@ -27,8 +27,8 @@ def discovery_grid(directional=False):
 
 class Strategy:
     route_detour_m=1000.
-    def __init__(self,robot,directional=False,baseline=False,grid='triangle',early_clears=3,localize_batch=3,scheduler='adaptive',joint_config=None):
-        if scheduler not in ('adaptive', 'legacy', 'joint', 'time_probe'):
+    def __init__(self,robot,directional=False,baseline=False,grid='triangle',early_clears=3,localize_batch=3,scheduler='adaptive',joint_config=None,rollout_config=None,rollout_backend='auto'):
+        if scheduler not in ('adaptive', 'legacy', 'joint', 'time_probe', 'rollout'):
             raise ValueError('Unknown scheduler')
         if localize_batch < 0 or early_clears < 0:
             raise ValueError('Batch and early clear limits must be nonnegative')
@@ -42,6 +42,9 @@ class Strategy:
         self.phase_costs={};self.no_signals=0
         self.pruned_nodes=0;self.replans=0;self.supplemental_measures=0
         self.joint_config=joint_config or {};self.action_trace=[];self.decision=None
+        if rollout_backend not in ('python','cpp','auto'):raise ValueError('Unknown rollout backend')
+        self.rollout_config=rollout_config or {};self.rollout_backend=rollout_backend
+        self.rollout_actual_backend=None;self.rollout_decisions=[]
     def _trace(self,point,channel,action,response):
         self.action_trace.append(dict(index=len(self.action_trace),point=np.asarray(point).tolist(),
             channel=channel,action=action,response=dict(response),decision=self.decision or {'reason':self.phase},
@@ -250,7 +253,10 @@ class Strategy:
 
     def run(self):
         points=self._grid_points()
-        if self.scheduler in ('joint','time_probe'):
+        if self.scheduler=='rollout':
+            from rollout_strategy import RolloutScheduler
+            basis=RolloutScheduler(self).run(points)
+        elif self.scheduler in ('joint','time_probe'):
             from joint_strategy import JointScheduler
             joint=JointScheduler(self)
             points=joint.points(points)
@@ -263,6 +269,8 @@ class Strategy:
                 'localize_batch':self.localize_batch,'scheduler':self.scheduler,
                 'build_version':BUILD_VERSION,
                 'joint_config':self.joint_config,'action_trace':self.action_trace,
+                'rollout_config':self.rollout_config,'rollout_backend':self.rollout_actual_backend,
+                'rollout_requested_backend':self.rollout_backend,'rollout_decisions':self.rollout_decisions,
                 'full_survey_reference':{'nodes':len(points),'channels':20,
                     'measurements':len(points)*20,'measurement_and_switching_s':len(points)*119,
                     'scope':'Reference for scanning all 20 channels at every node with the current channel first; not an adaptive lower bound'},

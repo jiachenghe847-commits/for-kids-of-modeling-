@@ -28,6 +28,7 @@ jobs:
           cache-dependency-path: apps/b_robot_windows/requirements-build.txt
       - name: Install packaging dependencies
         run: python -m pip install -r requirements-build.txt
+      - uses: ilammy/msvc-dev-cmd@v1
       - name: Check desktop lifecycle without network
         run: python -m unittest test_launcher -v
       - name: Build directory bundle

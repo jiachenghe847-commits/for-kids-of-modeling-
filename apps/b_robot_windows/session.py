@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / 'frozen'))
 from transport import HttpRobot
 from strategy import Strategy
+from rollout_runtime import selected_settings
 
 
 class StopRequested(Exception):
@@ -85,7 +86,9 @@ def run_session(robot_id, case_code, question, stop, emit, root=None,
             return response
 
     robot = ReportingRobot(robot_id, 'http://127.0.0.1:2026', folder / 'client.jsonl')
-    policy = strategy_factory(robot, question == 4, grid='compact' if question == 4 else 'ring', early_clears=3)
+    settings = selected_settings(question)
+    policy = strategy_factory(robot, question == 4, grid='compact' if question == 4 else 'ring', early_clears=3,**settings)
+    result['selected_settings'] = settings
     entered = False
     started = time.perf_counter()
     try:
@@ -113,6 +116,9 @@ def run_session(robot_id, case_code, question, stop, emit, root=None,
                 result['exit_error'] = f'{type(close_error).__name__}: {close_error}'
     finally:
         result['action_trace']=getattr(policy,'action_trace',[])
+        result.update(rollout_decisions=getattr(policy,'rollout_decisions',[]),
+                      rollout_config=getattr(policy,'rollout_config',{}),
+                      rollout_backend=getattr(policy,'rollout_actual_backend',None))
         result.update(wall_seconds=time.perf_counter() - started, unresolved_action=robot.uncertain)
         result.setdefault('exit_confirmed', False)
         write_json(result_path, result)

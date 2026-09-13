@@ -1,0 +1,612 @@
+{
+  "status": "passed",
+  "checks": [
+    {
+      "directional": false,
+      "seed": 200,
+      "channel": 3,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.007600626995554194,
+      "cpp_s": 0.0007588530133944005,
+      "residual_s": 5.684341886080802e-14
+    },
+    {
+      "directional": false,
+      "seed": 200,
+      "channel": 3,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.006584249000297859,
+      "cpp_s": 0.0006710279849357903,
+      "residual_s": 2.2737367544323206e-13
+    },
+    {
+      "directional": false,
+      "seed": 200,
+      "channel": 3,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.0067542759934440255,
+      "cpp_s": 0.0006792139902245253,
+      "residual_s": 5.684341886080802e-14
+    },
+    {
+      "directional": false,
+      "seed": 200,
+      "channel": 3,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.002155613008653745,
+      "cpp_s": 0.0004156240029260516,
+      "residual_s": 8.526512829121202e-14
+    },
+    {
+      "directional": false,
+      "seed": 200,
+      "channel": 3,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.002101016987580806,
+      "cpp_s": 0.00041116398642770946,
+      "residual_s": 0.0
+    },
+    {
+      "directional": false,
+      "seed": 200,
+      "channel": 3,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.002297606988577172,
+      "cpp_s": 0.00043195500620640814,
+      "residual_s": 0.0
+    },
+    {
+      "directional": false,
+      "seed": 200,
+      "channel": 3,
+      "worlds": 51,
+      "action": "certified_clear",
+      "python_s": 0.0004983069957233965,
+      "cpp_s": 0.00031899200985208154,
+      "residual_s": 1.4210854715202004e-13
+    },
+    {
+      "directional": false,
+      "seed": 200,
+      "channel": 3,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.0021109730005264282,
+      "cpp_s": 0.0004859100154135376,
+      "residual_s": 0.0
+    },
+    {
+      "directional": false,
+      "seed": 200,
+      "channel": 3,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.0024538839934393764,
+      "cpp_s": 0.0005065040022600442,
+      "residual_s": 0.0
+    },
+    {
+      "directional": false,
+      "seed": 200,
+      "channel": 9,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.007460059016011655,
+      "cpp_s": 0.0007569529989268631,
+      "residual_s": 1.1368683772161603e-13
+    },
+    {
+      "directional": false,
+      "seed": 200,
+      "channel": 9,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.007113348983693868,
+      "cpp_s": 0.0007050260028336197,
+      "residual_s": 5.684341886080802e-14
+    },
+    {
+      "directional": false,
+      "seed": 200,
+      "channel": 9,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.006577575026312843,
+      "cpp_s": 0.0006989709800109267,
+      "residual_s": 1.1368683772161603e-13
+    },
+    {
+      "directional": false,
+      "seed": 200,
+      "channel": 9,
+      "worlds": 51,
+      "action": "certified_clear",
+      "python_s": 0.000420397991547361,
+      "cpp_s": 0.0002476119843777269,
+      "residual_s": 1.4210854715202004e-13
+    },
+    {
+      "directional": false,
+      "seed": 200,
+      "channel": 9,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.002397158998064697,
+      "cpp_s": 0.000450851017376408,
+      "residual_s": 2.842170943040401e-14
+    },
+    {
+      "directional": false,
+      "seed": 200,
+      "channel": 9,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.002054303011391312,
+      "cpp_s": 0.0004242330032866448,
+      "residual_s": 0.0
+    },
+    {
+      "directional": false,
+      "seed": 201,
+      "channel": 2,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.00763681999524124,
+      "cpp_s": 0.0007505740213673562,
+      "residual_s": 1.7053025658242404e-13
+    },
+    {
+      "directional": false,
+      "seed": 201,
+      "channel": 2,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.007227820984553546,
+      "cpp_s": 0.0007100990042090416,
+      "residual_s": 5.684341886080802e-14
+    },
+    {
+      "directional": false,
+      "seed": 201,
+      "channel": 2,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.006647014000918716,
+      "cpp_s": 0.0006745200080331415,
+      "residual_s": 1.7053025658242404e-13
+    },
+    {
+      "directional": false,
+      "seed": 201,
+      "channel": 2,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.0021714929898735136,
+      "cpp_s": 0.0004099559737369418,
+      "residual_s": 2.842170943040401e-14
+    },
+    {
+      "directional": false,
+      "seed": 201,
+      "channel": 2,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.0021140530006960034,
+      "cpp_s": 0.00038528398727066815,
+      "residual_s": 0.0
+    },
+    {
+      "directional": false,
+      "seed": 201,
+      "channel": 2,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.0022451569966506213,
+      "cpp_s": 0.00041238899575546384,
+      "residual_s": 2.842170943040401e-14
+    },
+    {
+      "directional": false,
+      "seed": 201,
+      "channel": 2,
+      "worlds": 51,
+      "action": "certified_clear",
+      "python_s": 0.0005021249817218632,
+      "cpp_s": 0.0003180560015607625,
+      "residual_s": 7.105427357601002e-14
+    },
+    {
+      "directional": false,
+      "seed": 201,
+      "channel": 2,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.0023509919992648065,
+      "cpp_s": 0.00048624799819663167,
+      "residual_s": 0.0
+    },
+    {
+      "directional": false,
+      "seed": 201,
+      "channel": 2,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.0022322199947666377,
+      "cpp_s": 0.0005036740039940923,
+      "residual_s": 0.0
+    },
+    {
+      "directional": false,
+      "seed": 201,
+      "channel": 6,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.008179633994586766,
+      "cpp_s": 0.0007765130139887333,
+      "residual_s": 2.8421709430404007e-13
+    },
+    {
+      "directional": false,
+      "seed": 201,
+      "channel": 6,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.009051599976373836,
+      "cpp_s": 0.0009043419850058854,
+      "residual_s": 5.684341886080802e-14
+    },
+    {
+      "directional": false,
+      "seed": 201,
+      "channel": 6,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.007423834991641343,
+      "cpp_s": 0.0007213460048660636,
+      "residual_s": 5.684341886080802e-14
+    },
+    {
+      "directional": false,
+      "seed": 201,
+      "channel": 6,
+      "worlds": 51,
+      "action": "optical",
+      "python_s": 0.003038279013708234,
+      "cpp_s": 0.0003456160193309188,
+      "residual_s": 0.0
+    },
+    {
+      "directional": false,
+      "seed": 201,
+      "channel": 6,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.0020886700076516718,
+      "cpp_s": 0.00040512101259082556,
+      "residual_s": 8.526512829121202e-14
+    },
+    {
+      "directional": false,
+      "seed": 201,
+      "channel": 6,
+      "worlds": 51,
+      "action": "probe",
+      "python_s": 0.002233364008134231,
+      "cpp_s": 0.00040907200309447944,
+      "residual_s": 2.842170943040401e-14
+    },
+    {
+      "directional": true,
+      "seed": 200,
+      "channel": 3,
+      "worlds": 585,
+      "action": "probe",
+      "python_s": 0.9415088609966915,
+      "cpp_s": 0.05397541500860825,
+      "residual_s": 0.0
+    },
+    {
+      "directional": true,
+      "seed": 200,
+      "channel": 3,
+      "worlds": 585,
+      "action": "probe",
+      "python_s": 0.6875293359917123,
+      "cpp_s": 0.0509759150154423,
+      "residual_s": 5.115907697472721e-13
+    },
+    {
+      "directional": true,
+      "seed": 200,
+      "channel": 3,
+      "worlds": 585,
+      "action": "probe",
+      "python_s": 0.7802437999926042,
+      "cpp_s": 0.052515218005282804,
+      "residual_s": 4.547473508864641e-13
+    },
+    {
+      "directional": true,
+      "seed": 200,
+      "channel": 3,
+      "worlds": 585,
+      "action": "probe",
+      "python_s": 0.0428489469923079,
+      "cpp_s": 0.007786155998473987,
+      "residual_s": 2.842170943040401e-14
+    },
+    {
+      "directional": true,
+      "seed": 200,
+      "channel": 3,
+      "worlds": 585,
+      "action": "probe",
+      "python_s": 0.04157723599928431,
+      "cpp_s": 0.004319343017414212,
+      "residual_s": 1.5631940186722204e-13
+    },
+    {
+      "directional": true,
+      "seed": 200,
+      "channel": 3,
+      "worlds": 585,
+      "action": "probe",
+      "python_s": 0.04829462600173429,
+      "cpp_s": 0.006855431012809277,
+      "residual_s": 5.684341886080802e-14
+    },
+    {
+      "directional": true,
+      "seed": 200,
+      "channel": 3,
+      "worlds": 585,
+      "action": "certified_clear",
+      "python_s": 0.005024887999752536,
+      "cpp_s": 0.003012548986589536,
+      "residual_s": 3.055333763768431e-13
+    },
+    {
+      "directional": true,
+      "seed": 200,
+      "channel": 3,
+      "worlds": 585,
+      "action": "probe",
+      "python_s": 0.015117521019419655,
+      "cpp_s": 0.004770469007780775,
+      "residual_s": 1.6342482922482304e-13
+    },
+    {
+      "directional": true,
+      "seed": 200,
+      "channel": 3,
+      "worlds": 585,
+      "action": "probe",
+      "python_s": 0.012186809995910153,
+      "cpp_s": 0.004160976997809485,
+      "residual_s": 1.4210854715202004e-14
+    },
+    {
+      "directional": true,
+      "seed": 200,
+      "channel": 5,
+      "worlds": 585,
+      "action": "probe",
+      "python_s": 0.32598326398874633,
+      "cpp_s": 0.024386821984080598,
+      "residual_s": 1.7053025658242404e-13
+    },
+    {
+      "directional": true,
+      "seed": 200,
+      "channel": 5,
+      "worlds": 585,
+      "action": "probe",
+      "python_s": 0.24986577598610893,
+      "cpp_s": 0.019517573004122823,
+      "residual_s": 2.8421709430404007e-13
+    },
+    {
+      "directional": true,
+      "seed": 200,
+      "channel": 5,
+      "worlds": 585,
+      "action": "probe",
+      "python_s": 0.3160450529830996,
+      "cpp_s": 0.022809018002590165,
+      "residual_s": 3.979039320256561e-13
+    },
+    {
+      "directional": true,
+      "seed": 200,
+      "channel": 5,
+      "worlds": 585,
+      "action": "probe",
+      "python_s": 0.1362351469870191,
+      "cpp_s": 0.008428914996329695,
+      "residual_s": 1.4210854715202004e-13
+    },
+    {
+      "directional": true,
+      "seed": 200,
+      "channel": 5,
+      "worlds": 585,
+      "action": "probe",
+      "python_s": 0.10468891897471622,
+      "cpp_s": 0.011171429010573775,
+      "residual_s": 2.842170943040401e-14
+    },
+    {
+      "directional": true,
+      "seed": 200,
+      "channel": 5,
+      "worlds": 585,
+      "action": "probe",
+      "python_s": 0.1164931420062203,
+      "cpp_s": 0.009501813998213038,
+      "residual_s": 5.684341886080802e-14
+    },
+    {
+      "directional": true,
+      "seed": 201,
+      "channel": 2,
+      "worlds": 585,
+      "action": "probe",
+      "python_s": 0.9510967139794957,
+      "cpp_s": 0.07032325700856745,
+      "residual_s": 6.821210263296962e-13
+    },
+    {
+      "directional": true,
+      "seed": 201,
+      "channel": 2,
+      "worlds": 585,
+      "action": "probe",
+      "python_s": 0.9433927110221703,
+      "cpp_s": 0.06721204600762576,
+      "residual_s": 3.410605131648481e-13
+    },
+    {
+      "directional": true,
+      "seed": 201,
+      "channel": 2,
+      "worlds": 585,
+      "action": "probe",
+      "python_s": 0.8269016269769054,
+      "cpp_s": 0.06899865699233487,
+      "residual_s": 1.1368683772161603e-13
+    },
+    {
+      "directional": true,
+      "seed": 201,
+      "channel": 2,
+      "worlds": 585,
+      "action": "probe",
+      "python_s": 0.24297302501508966,
+      "cpp_s": 0.01842441299231723,
+      "residual_s": 0.0
+    },
+    {
+      "directional": true,
+      "seed": 201,
+      "channel": 2,
+      "worlds": 585,
+      "action": "probe",
+      "python_s": 0.2308026099926792,
+      "cpp_s": 0.01810979499714449,
+      "residual_s": 5.684341886080802e-14
+    },
+    {
+      "directional": true,
+      "seed": 201,
+      "channel": 2,
+      "worlds": 585,
+      "action": "probe",
+      "python_s": 0.2891609499929473,
+      "cpp_s": 0.02852027799235657,
+      "residual_s": 5.684341886080802e-14
+    },
+    {
+      "directional": true,
+      "seed": 201,
+      "channel": 2,
+      "worlds": 192,
+      "action": "probe",
+      "python_s": 0.21897413997794501,
+      "cpp_s": 0.015074068011017516,
+      "residual_s": 2.2737367544323206e-13
+    },
+    {
+      "directional": true,
+      "seed": 201,
+      "channel": 2,
+      "worlds": 192,
+      "action": "probe",
+      "python_s": 0.19850496301660314,
+      "cpp_s": 0.01579433199367486,
+      "residual_s": 8.526512829121202e-14
+    },
+    {
+      "directional": true,
+      "seed": 201,
+      "channel": 2,
+      "worlds": 192,
+      "action": "probe",
+      "python_s": 0.20275831100298092,
+      "cpp_s": 0.01453496899921447,
+      "residual_s": 2.842170943040401e-14
+    },
+    {
+      "directional": true,
+      "seed": 201,
+      "channel": 2,
+      "worlds": 165,
+      "action": "probe",
+      "python_s": 0.21697248800774105,
+      "cpp_s": 0.014463047991739586,
+      "residual_s": 1.1368683772161603e-13
+    },
+    {
+      "directional": true,
+      "seed": 201,
+      "channel": 2,
+      "worlds": 165,
+      "action": "probe",
+      "python_s": 0.18964157198206522,
+      "cpp_s": 0.013366017024964094,
+      "residual_s": 3.694822225952521e-13
+    },
+    {
+      "directional": true,
+      "seed": 201,
+      "channel": 2,
+      "worlds": 165,
+      "action": "probe",
+      "python_s": 0.23887114899116568,
+      "cpp_s": 0.021552356018219143,
+      "residual_s": 1.7053025658242404e-13
+    },
+    {
+      "directional": true,
+      "seed": 201,
+      "channel": 2,
+      "worlds": 144,
+      "action": "probe",
+      "python_s": 0.2896272359939758,
+      "cpp_s": 0.013718247995711863,
+      "residual_s": 5.684341886080802e-14
+    },
+    {
+      "directional": true,
+      "seed": 201,
+      "channel": 2,
+      "worlds": 144,
+      "action": "probe",
+      "python_s": 0.19394972699228674,
+      "cpp_s": 0.012493509013438597,
+      "residual_s": 0.0
+    },
+    {
+      "directional": true,
+      "seed": 201,
+      "channel": 2,
+      "worlds": 144,
+      "action": "probe",
+      "python_s": 0.24701014198944904,
+      "cpp_s": 0.014895050000632182,
+      "residual_s": 1.1368683772161603e-13
+    }
+  ],
+  "geometry_cases": 80,
+  "speedup": 13.319346238140424,
+  "default_eligible": true,
+  "source_sha256": {
+    "rollout_kernel.py": "c69e3fe09fbc725584c9ff380e2b23748b590069db909c6486681d4307cf1a60",
+    "rollout_cpp.cpp": "c9c280203a46b7f5203df321f24090006cd375e5665dcd7ac5ccda1964ff720b"
+  }
+}

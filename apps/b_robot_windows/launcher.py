@@ -12,12 +12,14 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 
 from session import log_root, run_session, validate_inputs, write_json
+from strategy import BUILD_VERSION
+from rollout_runtime import selected_settings, native_backend
 
 
 class App:
     def __init__(self, window):
         self.window = window
-        window.title('B 题机器狗 · v4 演练')
+        window.title('B 题机器狗 · '+BUILD_VERSION)
         window.geometry('660x530')
         window.minsize(620, 510)
         self.events = queue.Queue()
@@ -205,7 +207,9 @@ def main():
             window.update()
             args.smoke_test.parent.mkdir(parents=True, exist_ok=True)
             write_json(args.smoke_test, dict(status='passed', tk=window.tk.call('info', 'patchlevel'),
-                       window_created=True, network_requests=0, frozen=bool(getattr(sys, 'frozen', False))))
+                       window_created=True, network_requests=0, frozen=bool(getattr(sys, 'frozen', False)),
+                       native_available=native_backend() is not None,
+                       selected_settings={str(q):selected_settings(q) for q in (3,4)}))
             window.destroy()
         else:
             window.mainloop()

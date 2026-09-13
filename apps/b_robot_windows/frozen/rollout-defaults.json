@@ -1,0 +1,53 @@
+{
+  "runtime_source_sha256": {
+    "geometry.py": "3cb7c6e79ce0bea7ceb7157df332e8a106749203c5e44417cb63a277a5cdca47",
+    "search_coverage.py": "6471444a326ec9ec5b88fd9bdc211c1f031bb9f826caa46d6232d5fd22400e2f",
+    "strategy.py": "6d49e9ce0c8ba155f1ef70f2fe83a539a67947888416c88d7b766aecadff69d8",
+    "joint_strategy.py": "f044785348d8d7585b7c3715588d4685fbdf5424d2382081353fdb8b59dec166",
+    "transport.py": "30fe80d9f80cc4b7fe9342553b71d56900713e3df5e7aef842953641c080ef95",
+    "rollout_kernel.py": "c69e3fe09fbc725584c9ff380e2b23748b590069db909c6486681d4307cf1a60",
+    "rollout_strategy.py": "6c7b582c2e8a3941bce3704c3348c73a61efd99fefde3ac5332419e41ba7995c",
+    "rollout_runtime.py": "f5e8a26a4e440717da8138ac5084428315c111ab2bd73244524d96e11fb3829d"
+  },
+  "questions": {
+    "3": {
+      "accepted": true,
+      "rollout_config": {
+        "samples": 65,
+        "search_rounds": 6,
+        "optical_trigger": 30.0,
+        "spacing": 25.0,
+        "safe_shift": true,
+        "small_cover": false,
+        "unified_route": true,
+        "negative_grid": false,
+        "ring_radius": 1558.8457268119894,
+        "radius_mode": "min",
+        "decision_budget_s": 2.0,
+        "planning_budget_s": 60.0,
+        "max_worlds": 585
+      },
+      "rollout_backend": "cpp"
+    },
+    "4": {
+      "accepted": false,
+      "rollout_config": {
+        "samples": 65,
+        "search_rounds": 6,
+        "optical_trigger": 45.0,
+        "spacing": 25.0,
+        "safe_shift": false,
+        "small_cover": false,
+        "unified_route": false,
+        "negative_grid": false,
+        "ring_radius": 1558.8457268119894,
+        "radius_mode": "min",
+        "decision_budget_s": 2.0,
+        "planning_budget_s": 60.0,
+        "max_worlds": 585
+      },
+      "rollout_backend": "python"
+    }
+  },
+  "acceptance_sha256": "a20066d07040dfa7df28c7b5cc31d3426ab5ae4b209daefedc694a62797b1d1f"
+}

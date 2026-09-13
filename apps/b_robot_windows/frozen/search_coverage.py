@@ -1,6 +1,36 @@
 """Conservative triangular-lattice discovery with an explicit coverage argument."""
 import math
 import numpy as np
+from scipy.spatial import ConvexHull, Delaunay
+from geometry import clip
+
+
+class DirectionalCertificate:
+    """Short-edge triangulation; pruning never relies on sampled orientations."""
+
+    def __init__(self, points):
+        self.points = np.asarray(points, float)
+        self.triangles = Delaunay(self.points).simplices
+        vertices = self.points[self.triangles]
+        edges = vertices - np.roll(vertices, 1, axis=1)
+        self.valid = bool(np.max(np.linalg.norm(edges, axis=2)) < 1000 - 1e-7)
+        self.hull = ConvexHull(self.points).equations
+
+    def relevant_nodes(self, polygon):
+        polygon = np.asarray(polygon, float)
+        all_nodes = set(range(len(self.points)))
+        if not self.valid or not len(polygon):
+            return all_nodes
+        if np.max(polygon @ self.hull[:, :2].T + self.hull[:, 2]) > 1e-7:
+            return all_nodes
+        nodes = set()
+        for indices in self.triangles:
+            triangle = self.points[indices]
+            edge = np.roll(triangle, -1, axis=0) - triangle
+            normals = np.c_[edge[:, 1], -edge[:, 0]]
+            if len(clip(polygon, normals, np.sum(normals * triangle, axis=1))):
+                nodes.update(map(int, indices))
+        return nodes or all_nodes
 
 
 def omnidirectional_ring():

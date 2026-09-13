@@ -1,4 +1,4 @@
-"""Desktop lifecycle around the unchanged v4 strategy and HTTP transport."""
+"""Desktop lifecycle around the validated adaptive strategy and HTTP transport."""
 import hashlib
 import json
 import os

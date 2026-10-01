@@ -24,7 +24,7 @@
 | `analysis/exposition-guide.md` | 论证展开指南：一个公式该配哪几句、一张图该怎么导入和解读、算法小节必须含哪四样——管**内容展开到什么程度**。每条配官方优秀论文原文对照。刻意不给字数指标（小节级语料基线做不出来，理由写在文档里） |
 | `analysis/judge-deductions.md` | 交稿前自查清单（29 条，每条标注证据来源） |
 | `analysis/figure-guide.md` | 配图指南：图类型/章节位置/美观规范/工具选型（含 AI 生图的合规边界） |
-| `corpus/` | 37 篇往届获奖论文提取文本（2002-2025，来自 GitHub 公开仓库）+ 官方 2023 年 14 篇提取件，来源清单见 `corpus/manifest.md` |
+| `corpus/` | 37 篇往届获奖论文提取文本（2002-2025，来自 GitHub 公开仓库；三个年份目录共 40 个文件，其余 3 个是 `_fetch-log.md` 抓取日志）+ `official-2023/` 下官方 2023 年 14 篇提取件，来源清单见 `corpus/manifest.md`（`python checklist/check_corpus.py corpus` 报告共 51 篇） |
 | `建模/` | 64 篇官方优秀论文原文（2021-2025），供人工/AI 深度分析，见 `corpus/manifest.md` 来源清单 |
 | `notation.md` | 三人共用符号表——新符号先加进这里再用，避免合稿对不上 |
 | `templates/paper.tex` | LaTeX 主模板，调用 `cumcm-paper.sty` 的 B226 竞赛型版式（紧凑首页、标题层级、三线表、浮动控制、AI 声明）。**项目统一使用 `xelatex`**：在 `templates/` 目录运行 `xelatex paper.tex` 两趟解析编号 |

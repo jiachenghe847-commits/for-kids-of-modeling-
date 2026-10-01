@@ -81,3 +81,9 @@ PYTHONPATH=. .venv/bin/python ~/somewhere/我的分析.py
 ## 工具箱本身在迭代
 
 `analysis/`、`templates/`、`snippets/` 不是锁死的最终版。如果发现某处不趁手，或者又找到了新的金奖论文想补充分析，直接改，改完提交并在对应文件的"更新记录"里加一行。
+
+## 维护本仓库时
+
+- 目录：`analysis/` 方法与写作指南；`snippets/` 方法代码；`templates/`、`checklist/`、`tools/` 脚手架与审计工具（各带 `tests/`）；`examples/` 示范；`drills/` 演练；`corpus/` 为 37 篇 GitHub 获奖论文提取文本（三个年份目录）+ `official-2023/` 14 篇官方提取文本，`manifest.md`、`_fetch-log.md` 不是论文；`建模/` 为 64 篇官方优秀论文 PDF。
+- 检查：`.venv/bin/python -m pytest checklist/tests/ templates/tests/ tools/tests/ snippets/`（`checklist/tests/test_pdf_*.py` 需要 Poppler 的 `pdfinfo`/`pdftotext`）；改动语料后运行 `python checklist/check_corpus.py corpus`（当前应为共 51 篇）。
+- 完成标准：相关检查通过或如实说明未运行及原因；文档中的路径、篇数与仓库实际一致；在对应文件的"更新记录"里登记改动。

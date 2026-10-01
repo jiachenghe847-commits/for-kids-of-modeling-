@@ -39,7 +39,7 @@
 | `checklist/paper_completeness.py` | 完备性对标：把论文的摘要字数、正文字数、图表数、附录占比、各章占比与官方优秀论文（2023，n=14）的实测四分位逐项对照。**不计入警告数、不影响 `--strict`**——篇幅达标和研究质量是两件事。基准直接由 `analysis/paper-structure.md` 附表二的原始数据算出，可单独运行 |
 | `checklist/manual_verification.md` | **人工核对清单——AI 起草的所有数值/公式定稿前必须过这道关**；`case_audit.py` 查不到的内容真伪由这份清单兜底 |
 | `examples/示范论文/` | **10 页工具链示范，不是深度/篇幅范本**——展示数据预处理→建模→验证→JSON→LaTeX 的单一数据源链路；完整比赛论文还必须满足 `analysis/modeling-workflow.md` |
-| `drills/2025-B-sic-epilayer/` | 2025 B 题（碳化硅外延层厚度）**走完整质量契约的盲测演练**：唯一一次把 `case.json` 证据链也跑完的演练，`case_audit.py` 0 警告、`compliance_check.py` 未发现问题、论文逐字节可复现。折射率与厚度从附件光谱联合拟合，不引用任何外部材料常数。想看质量契约落到真题上是什么样，从这里开始 |
+| `drills/2025-B-sic-epilayer/` | 2025 B 题（碳化硅外延层厚度）**走完整质量契约的盲测演练**：唯一一次把 `case.json` 证据链也跑完的演练，`case_audit.py` 0 警告、`compliance_check.py` 未发现问题、主计算数值经独立重跑一致（跨环境重跑时版本号、绝对路径和 PNG 字节会变，见该目录 README）。折射率与厚度从附件光谱联合拟合，不引用任何外部材料常数。想看质量契约落到真题上是什么样，从这里开始 |
 | `drills/2025-A-smoke-screen/` | 2025 A 题（烟幕干扰弹）**五问全解的盲测演练**：只用官方题目 PDF 和空白结果模板，不看同题论文。`solve.py` 约一分钟跑完，产出 `results.json`、三份官方 xlsx 和完整论文 PDF。这是「一道真题从头做到尾长什么样」的参照，不是获奖范本——问题五用的是分层配对启发式，本身就声明了不是全局最优 |
 | `drills/README.md` | 赛前模拟演练怎么做 |
 

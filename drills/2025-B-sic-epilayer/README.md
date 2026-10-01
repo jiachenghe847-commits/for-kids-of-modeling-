@@ -20,8 +20,11 @@
 cd drills/2025-B-sic-epilayer/paper && xelatex -interaction=nonstopmode paper.tex   # 跑两趟
 ```
 
-拟合用固定种子 `(1,2,3,4,5)` 的多起点。除 `results.json` 里的 `meta.runtime_seconds` 外，
-所有产物逐字节可复现（`paper.tex` 的 md5 在重跑后不变）。
+拟合用固定种子 `(1,2,3,4,5)` 的多起点。原环境（Python 3.14.4 / NumPy 2.5.1）记录为重跑后 `paper.tex`
+md5 不变。2026-10-01 在另一环境（Python 3.13.15 / NumPy 2.5.3 / Matplotlib 3.11.2）独立重跑上面三条
+Python 命令：`artifacts/*.json` 除 `meta` 版本号、`runtime_seconds` 和输入文件绝对路径外逐行一致，
+`paper.tex` 只有正文里的版本号一行不同，6 张 PNG 字节不同（未逐像素比较）；`paper.pdf` 未重编译。
+即跨环境重跑数值一致，但产物不是逐字节一致。`compute.py` 读 xlsx 需要 `openpyxl`（不在 `requirements.txt`）。
 
 单元测试：
 
